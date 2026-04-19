@@ -45,7 +45,8 @@ export default function PropertiesPage() {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(0, 19);
 
       if (error) {
         console.error('Error fetching properties:', error);

@@ -157,6 +157,11 @@ export default function PartnerDashboard() {
   const [bookedProperties, setBookedProperties] = useState<BookedProperty[]>([]);
   const [loadingConfirmedBookings, setLoadingConfirmedBookings] = useState(false);
 
+  // Properties pagination state — server-side pages, 20 per page
+  const [propertiesCurrentPage, setPropertiesCurrentPage] = useState(1);
+  const [propertiesTotalPages, setPropertiesTotalPages] = useState(1);
+  const [loadingMoreProperties, setLoadingMoreProperties] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/login?type=partner');
@@ -252,17 +257,30 @@ export default function PartnerDashboard() {
         setPartnerName(landlordProfile.full_name);
       }
 
-      // Fetch properties using landlord_id from landlord_profiles
-      const { data: propertiesData, error: propertiesError } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('landlord_id', landlordProfile.id)
-        .order('created_at', { ascending: false });
-
-      if (propertiesError) {
-        console.error('Error fetching properties:', propertiesError);
-      } else {
-        setProperties(propertiesData || []);
+      // Fetch properties via backend (paginated, page 1)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://jfgm6v6pkw.us-east-1.awsapprunner.com/api';
+      const { data: { session: propSession } } = await supabase.auth.getSession();
+      if (propSession?.access_token) {
+        try {
+          const propResponse = await fetch(`${backendUrl}/partner-properties?page=1&limit=20`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${propSession.access_token}`,
+            },
+            cache: 'no-store',
+          });
+          if (propResponse.ok) {
+            const propResult = await propResponse.json();
+            setProperties(propResult.properties || []);
+            setPropertiesCurrentPage(1);
+            setPropertiesTotalPages(propResult.pagination?.pages ?? 1);
+          } else {
+            console.error('Error fetching properties from backend:', propResponse.status);
+          }
+        } catch (propErr) {
+          console.error('Error fetching properties from backend:', propErr);
+        }
       }
 
       // For now, set empty bookings array since we don't have the bookings table set up yet
@@ -1173,6 +1191,7 @@ export default function PartnerDashboard() {
             </div>
 
             {properties.length > 0 ? (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
                 {properties.map((property) => (
                   <div 
@@ -1255,6 +1274,44 @@ export default function PartnerDashboard() {
                   </div>
                 ))}
               </div>
+              {propertiesCurrentPage < propertiesTotalPages && (
+                <div className="flex justify-center pt-2 pb-4">
+                  <button
+                    onClick={async () => {
+                      setLoadingMoreProperties(true);
+                      try {
+                        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://jfgm6v6pkw.us-east-1.awsapprunner.com/api';
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (!session?.access_token) return;
+                        const nextPage = propertiesCurrentPage + 1;
+                        const response = await fetch(`${backendUrl}/partner-properties?page=${nextPage}&limit=20`, {
+                          method: 'GET',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${session.access_token}`,
+                          },
+                          cache: 'no-store',
+                        });
+                        if (response.ok) {
+                          const result = await response.json();
+                          setProperties(existing => [...existing, ...(result.properties || [])]);
+                          setPropertiesCurrentPage(nextPage);
+                          setPropertiesTotalPages(result.pagination?.pages ?? 1);
+                        }
+                      } catch (err) {
+                        console.error('Error loading more properties:', err);
+                      } finally {
+                        setLoadingMoreProperties(false);
+                      }
+                    }}
+                    disabled={loadingMoreProperties}
+                    className="px-6 py-2 text-sm font-medium text-white bg-booking-teal hover:bg-booking-teal/90 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingMoreProperties ? 'Loading...' : 'Load More'}
+                  </button>
+                </div>
+              )}
+              </>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
                 <div className="p-12 text-center">
