@@ -168,6 +168,20 @@ const nextConfig = {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
   },
+  /**
+   * Use in-memory webpack cache during `next dev` so stale chunk manifests
+   * (e.g. MODULE_NOT_FOUND './948.js' and 500s on /_next/static/chunks/fallback/*)
+   * do not persist after interrupted compiles or Windows FS sync quirks.
+   * Production builds keep the default filesystem cache.
+   */
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // In-memory cache only: avoids stale persisted webpack FS cache on Windows
+      // after interrupted compiles (500 / missing chunk / wrong flight payload).
+      config.cache = { type: 'memory' };
+    }
+    return config;
+  },
 }
 
 module.exports = withPWA(nextConfig)

@@ -1,49 +1,48 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-export default function SignupChoicePage() {
-  const router = useRouter();
-
+export default function HomeEntryPage() {
   useEffect(() => {
-    // Check if user is an admin and redirect to admin login page
     const checkAdminAndRedirect = async () => {
       try {
-        // Check URL hash for Supabase auth tokens (email confirmation links)
         const hash = window.location.hash;
-        const hasAuthToken = hash.includes('access_token') || hash.includes('type=recovery') || hash.includes('type=signup');
-        
-        // Get session (might be established after email confirmation)
-        const { data: { session } } = await supabase.auth.getSession();
-        
+        const hasAuthToken =
+          hash.includes('access_token') ||
+          hash.includes('type=recovery') ||
+          hash.includes('type=signup');
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         if (session?.user) {
-          // Check if user has admin role in metadata
           const userRole = session.user.user_metadata?.role;
-          
+
           if (userRole === 'admin') {
-            // Determine admin frontend URL
-            const adminFrontendUrl = process.env.NEXT_PUBLIC_ADMIN_FRONTEND_URL || 
-              (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-                ? 'http://localhost:3002' 
+            const adminFrontendUrl =
+              process.env.NEXT_PUBLIC_ADMIN_FRONTEND_URL ||
+              (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                ? 'http://localhost:3002'
                 : 'https://admin.booking-hub.co.uk');
-            
-            // Redirect to admin frontend login page
+
             window.location.href = `${adminFrontendUrl}/auth/login?message=Email confirmed successfully. Please sign in.`;
             return;
           }
         } else if (hasAuthToken) {
-          // If we have an auth token in the URL but no session yet, wait a bit and check again
-          // This handles the case where Supabase is still processing the confirmation
           setTimeout(async () => {
-            const { data: { session: retrySession } } = await supabase.auth.getSession();
+            const {
+              data: { session: retrySession },
+            } = await supabase.auth.getSession();
             if (retrySession?.user?.user_metadata?.role === 'admin') {
-              const adminFrontendUrl = process.env.NEXT_PUBLIC_ADMIN_FRONTEND_URL || 
-                (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
-                  ? 'http://localhost:3002' 
+              const adminFrontendUrl =
+                process.env.NEXT_PUBLIC_ADMIN_FRONTEND_URL ||
+                (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                  ? 'http://localhost:3002'
                   : 'https://admin.booking-hub.co.uk');
               window.location.href = `${adminFrontendUrl}/auth/login?message=Email confirmed successfully. Please sign in.`;
             }
@@ -51,115 +50,85 @@ export default function SignupChoicePage() {
         }
       } catch (error) {
         console.error('Error checking admin status:', error);
-        // Continue with normal page rendering if check fails
       }
     };
 
     checkAdminAndRedirect();
-  }, [router]);
+  }, []);
+
+  const cardLinkClass =
+    'group flex flex-col items-center text-center p-6 sm:p-8 md:p-10 lg:p-12 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer no-underline h-full text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00BAB5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F6F4]';
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-start px-4 sm:px-6 pt-8 sm:pt-12 pb-8 sm:pb-12">
-      {/* Animated Background Image with Ken Burns effect */}
-      <div 
-        className="absolute inset-0 animate-ken-burns"
-        style={{
-          backgroundImage: 'url(/Houses%20-%202.webp)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      
-      {/* Background Image Opacity Overlay with fade animation */}
-      <div className="absolute inset-0 bg-[rgba(11,29,55,0.88)] pointer-events-none animate-overlay-fade"></div>
+    <main
+      className="min-h-svh w-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16 antialiased font-avenir bg-[#F6F6F4] text-[#0B1D37]"
+    >
+      <Link href="/" className="inline-flex mb-8 md:mb-10 lg:mb-12" aria-label="Booking Hub home">
+        <Image
+          src="/blue-teal.webp"
+          alt="Booking Hub"
+          width={320}
+          height={96}
+          priority
+          className="bh-logo w-auto"
+        />
+      </Link>
 
-      {/* Main Container */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto -mt-4 sm:-mt-6">
-        {/* Logo on Background with entrance animation */}
-        <div className="flex justify-center -mb-10 sm:-mb-14 lg:-mb-16">
-          <div className="animate-logo-entrance">
-            <Image
-              src="/white-teal.webp"
-              alt="Logo"
-              width={300}
-              height={300}
-              className="w-40 h-40 sm:w-52 sm:h-52 lg:w-64 lg:h-64 object-contain drop-shadow-2xl"
-              priority
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6 w-full max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl items-stretch">
+        <Link
+          href="/booking-request"
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.href = '/booking-request';
+          }}
+          className={cardLinkClass}
+          style={{ backgroundColor: '#0B1D37' }}
+        >
+          <p className="text-white bh-card-title mb-2 md:mb-3">I&apos;m a client</p>
+          <p className="bh-card-subtext bh-card-subtext--pair">Company or organisation</p>
+          <p className="bh-card-subtext bh-card-subtext--before-cta">
+            Book accommodation and manage
+            <br />
+            bookings
+          </p>
+          <div
+            className="bh-cta mt-auto"
+            style={{ backgroundColor: '#00BAB5', color: '#FFFFFF' }}
+          >
+            Get Started
+            <ArrowRight
+              className="h-4 w-4 shrink-0 text-inherit transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden
             />
           </div>
-        </div>
-        
-        {/* Main Heading with entrance animation */}
-        <h1 
-          style={{ fontFamily: 'var(--font-avenir-bold), sans-serif' }}
-          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-[#F6F6F4] mb-3 sm:mb-4 text-center animate-heading-entrance"
-        >
-          What is your role?
-        </h1>
-        
-        {/* Two Boxes Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {/* Client Box with entrance animation */}
-          <div className="signup-card bg-white rounded-xl shadow-lg p-4 sm:p-6 flex flex-col items-center text-center border border-gray-200 animate-card-entrance-1">
-            {/* Heading */}
-            <h2 
-              style={{ fontFamily: 'var(--font-avenir-bold), sans-serif' }}
-              className="text-xl sm:text-2xl md:text-3xl text-[#0B1D37] mb-3 sm:mb-4"
-            >
-              Client
-            </h2>
-            
-            {/* Description */}
-            <p 
-              style={{ fontFamily: 'var(--font-avenir), sans-serif', fontWeight: 500, letterSpacing: '0.08em' }}
-              className="w-full text-base sm:text-lg md:text-xl text-[#4B4E53] mb-4 sm:mb-6 text-center"
-            >
-              I'm a client booking accomodation
-            </p>
-            
-            {/* Sign up button with enhanced hover */}
-            <Link
-              href="/booking-request"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/booking-request'; }}
-              style={{ fontFamily: 'var(--font-avenir-regular), sans-serif' }}
-              className="signup-btn w-full bg-[#00BAB5] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-base sm:text-lg md:text-xl hover:bg-[#00A5A0] animate-btn-entrance-1"
-            >
-              Book Accomodation <span style={{ fontSize: '1.3em' }}>→</span>
-            </Link>
-          </div>
+        </Link>
 
-          {/* Partner Box with entrance animation (slightly delayed) */}
-          <div className="signup-card bg-white rounded-xl shadow-lg p-4 sm:p-6 flex flex-col items-center text-center border border-gray-200 animate-card-entrance-2">
-            {/* Heading */}
-            <h2 
-              style={{ fontFamily: 'var(--font-avenir-bold), sans-serif' }}
-              className="text-xl sm:text-2xl md:text-3xl text-[#0B1D37] mb-3 sm:mb-4"
-            >
-              Partner
-            </h2>
-            
-            {/* Description */}
-            <p 
-              style={{ fontFamily: 'var(--font-avenir), sans-serif', fontWeight: 500, letterSpacing: '0.08em' }}
-              className="w-full text-base sm:text-lg md:text-xl text-[#4B4E53] mb-4 sm:mb-6 text-center"
-            >
-              I'm a partner listing properties.
-            </p>
-            
-            {/* Sign up button with enhanced hover */}
-            <Link
-              href="/auth/signup/partner"
-              onClick={(e) => { e.preventDefault(); window.location.href = '/auth/signup/partner'; }}
-              style={{ fontFamily: 'var(--font-avenir-regular), sans-serif' }}
-              className="signup-btn w-full bg-[#00BAB5] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-base sm:text-lg md:text-xl hover:bg-[#00A5A0] animate-btn-entrance-2"
-            >
-              List Properties <span style={{ fontSize: '1.3em' }}>→</span>
-            </Link>
+        <Link
+          href="/auth/signup/partner"
+          onClick={(e) => {
+            e.preventDefault();
+            window.location.href = '/auth/signup/partner';
+          }}
+          className={cardLinkClass}
+          style={{ backgroundColor: '#0B1D37' }}
+        >
+          <p className="text-white bh-card-title mb-2 md:mb-3">I&apos;m a property partner</p>
+          <p className="bh-card-subtext bh-card-subtext--pair">Management company or operator</p>
+          <p className="bh-card-subtext bh-card-subtext--before-cta">
+            List properties and manage bookings
+          </p>
+          <div
+            className="bh-cta mt-auto"
+            style={{ backgroundColor: '#00BAB5', color: '#FFFFFF' }}
+          >
+            Get Started
+            <ArrowRight
+              className="h-4 w-4 shrink-0 text-inherit transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden
+            />
           </div>
-        </div>
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }
-

@@ -7,7 +7,16 @@ module.exports = {
   ],
   theme: {
     extend: {
+      borderColor: {
+        input: '#e5e7eb',
+      },
       colors: {
+        background: '#ffffff',
+        foreground: '#0b1d37',
+        ring: '#64748b',
+        muted: {
+          foreground: '#71717a',
+        },
         // Booking Hub color palette
         primary: {
           50: '#f0f9ff',
@@ -26,6 +35,10 @@ module.exports = {
         'booking-teal': '#00BAB5',
         'booking-gray': '#4B4E53',
         'booking-dark': '#0B1D37',
+        /* Entry portal (/) — HSL tokens aligned with design spec */
+        'entry-bg': 'hsl(40 7% 96%)',
+        'entry-navy': 'hsl(214 68% 13%)',
+        'entry-teal': 'hsl(178 100% 36.5%)',
         gray: {
           50: '#f9fafb',
           100: '#f3f4f6',

@@ -489,6 +489,439 @@
   .badge-info {
     @apply badge bg-blue-100 text-blue-800;
   }
+
+  /* Entry portal (/) — typography & CTA (matches Vite design tokens) */
+  /* Card title: Avenir 700, white, normal tracking; sizes per mobile / md / lg */
+  .bh-card-title {
+    @apply font-avenir-bold font-bold tracking-normal
+           text-[1.25rem] leading-[1.875rem]
+           md:text-[1.5rem] md:leading-[2rem]
+           lg:text-[1.875rem] lg:leading-[2.375rem];
+  }
+
+  /* Card subtext: Avenir (inherit), 600 + white/60 on element; 14/20 mobile, 16/24 md+ */
+  .bh-body {
+    @apply text-[0.875rem] leading-[1.25rem] md:text-[1rem] md:leading-[1.5rem];
+  }
+
+  /* Home (/) card subtext — matches inspected computed style from design */
+  .bh-card-subtext {
+    box-sizing: border-box;
+    display: block;
+    width: 325.344px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    border-style: solid;
+    border-color: rgb(221, 223, 227);
+    border-width: 0;
+    border-image: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: Avenir, "Avenir LT Std", "Nunito Sans", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    text-align: center;
+    tab-size: 4;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    unicode-bidi: isolate;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+  }
+
+  .bh-card-subtext--pair {
+    margin-bottom: 4px;
+  }
+
+  .bh-card-subtext--before-cta {
+    margin-bottom: 32px;
+  }
+
+  /* Booking request wizard — hubflow-launchpad.lovable.app /client/request (published CSS) */
+  .bh-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100svh;
+    padding: 1.5rem 1rem;
+    background-color: #f9fafb;
+  }
+
+  @media (min-width: 640px) {
+    .bh-page {
+      padding: 2rem 1.25rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .bh-page {
+      justify-content: flex-start;
+      padding: 3rem 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-page {
+      padding: 4rem 2rem;
+    }
+  }
+
+  .bh-form-card {
+    width: 100%;
+    max-width: 42rem;
+    border-radius: 1.5rem;
+    background-color: #fff;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    padding: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .bh-form-card {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .bh-form-card {
+      padding: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-form-card {
+      max-width: 56rem;
+      padding: 3rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .bh-form-card {
+      max-width: 64rem;
+      padding: 3.5rem;
+    }
+  }
+
+  .bh-h1 {
+    letter-spacing: -0.025em;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 2.375rem;
+    color: #0b1d37;
+  }
+
+  @media (min-width: 768px) {
+    .bh-h1 {
+      font-size: 2.25rem;
+      line-height: 2.75rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-h1 {
+      font-size: 3rem;
+      line-height: 3.75rem;
+    }
+  }
+
+  /* Section headings on request form (Lovable .bh-card-title) */
+  .bh-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.875rem;
+    color: rgb(11, 29, 55);
+  }
+
+  @media (min-width: 768px) {
+    .bh-card-title {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-card-title {
+      font-size: 1.875rem;
+      line-height: 2.375rem;
+    }
+  }
+
+  .bh-lead {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+    color: #4b4e53;
+  }
+
+  @media (min-width: 768px) {
+    .bh-lead {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-lead {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+  }
+
+  /* .bh-label: shared base for section h2 + field labels (sizes); field labels add utilities + inline color */
+  .bh-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-transform: none;
+    color: rgb(11, 29, 55);
+  }
+
+  @media (min-width: 768px) {
+    .bh-label {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  }
+
+  .bh-small {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+
+  @media (min-width: 768px) {
+    .bh-small {
+      font-size: 0.8125rem;
+    }
+  }
+
+  /* Muted + primary copy (ClientRequest / index.css tokens) */
+  .bh-muted {
+    color: #4b4e53;
+  }
+
+  .bh-text-primary {
+    color: #0b1d37;
+  }
+
+  /* Summary strip from reference: rounded-xl p-4 md:p-5, #F0F0EE */
+  .bh-summary-strip {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background-color: #f0f0ee;
+  }
+
+  @media (min-width: 768px) {
+    .bh-summary-strip {
+      padding: 1.25rem;
+    }
+  }
+
+  /* Form controls (Lovable .bh-input: rounded-xl, 2.75rem / 3rem height, 14px / 16px) */
+  .bh-input {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    height: 2.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition-property: color, background-color, border-color;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #f3f4f6;
+    color: #0b1d37;
+    font-family: var(--font-avenir-regular), Avenir, "Avenir LT Std", "Nunito Sans", system-ui,
+      sans-serif;
+  }
+
+  .bh-input::file-selector-button {
+    margin-right: 1rem;
+    border-width: 0;
+    background-color: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: #0b1d37;
+  }
+
+  .bh-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  @media (min-width: 768px) {
+    .bh-input {
+      height: 3rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  textarea.bh-input {
+    min-height: 120px;
+    height: auto;
+    align-items: flex-start;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    resize: vertical;
+  }
+
+  @media (min-width: 768px) {
+    textarea.bh-input {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+  }
+
+  select.bh-input {
+    appearance: none;
+    background-color: #f3f4f6;
+  }
+
+  .bh-input::placeholder {
+    color: #4b4e53;
+  }
+
+  .bh-input:focus-visible {
+    @apply outline-none ring-2 ring-[#00bab5] ring-offset-2 ring-offset-white;
+    border-color: #00bab5;
+  }
+
+  .bh-input-error {
+    border-color: #ef4444;
+  }
+
+  .bh-input-error:focus-visible {
+    @apply ring-red-500;
+    border-color: #ef4444;
+  }
+
+  /* Primary CTA (Lovable .bh-cta): full width, pill, opacity hover */
+  .bh-cta {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: Avenir, "Avenir LT Std", "Nunito Sans", system-ui, -apple-system, sans-serif;
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .bh-cta:hover {
+    opacity: 0.9;
+  }
+
+  @media (min-width: 768px) {
+    .bh-cta {
+      padding-top: 0.875rem;
+      padding-bottom: 0.875rem;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bh-cta {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+  .bh-cta:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  /* Secondary outline (Lovable .bh-btn-secondary) */
+  .bh-btn-secondary {
+    display: flex;
+    width: 100%;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    background-color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition-property: color, background-color, border-color;
+    transition-duration: 0.15s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: Avenir, "Avenir LT Std", "Nunito Sans", system-ui, -apple-system, sans-serif;
+  }
+
+  .bh-btn-secondary:hover {
+    background-color: #f9fafb;
+  }
+
+  @media (min-width: 768px) {
+    .bh-btn-secondary {
+      height: 3rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  /* Small teal control (+ Add Booking) */
+  .bh-cta-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    color: #fff;
+    background-color: #00bab5;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: Avenir, "Avenir LT Std", "Nunito Sans", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .bh-cta-add:hover {
+    opacity: 0.9;
+  }
+
+  /* Matches Lovable reference (.bh-logo): 2rem → 3.5rem by breakpoint */
+  .bh-logo {
+    @apply h-8 w-auto sm:h-9 md:h-10 lg:h-12 xl:h-14 object-contain;
+  }
 }
 
 @layer utilities {
@@ -527,4 +960,20 @@
   --ion-safe-area-right: env(safe-area-inset-right, 0px);
 }
 
+}
+
+/* Outside @layer: keyframes + payment select panel (avoids PostCSS/@layer edge cases in dev) */
+@keyframes bh-payment-select-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bh-payment-select-content[data-state='open'] {
+  animation: bh-payment-select-content-in 150ms ease-out;
 }
