@@ -2,79 +2,91 @@
 
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { Capacitor } from '@capacitor/core';
 
+/**
+ * Native WebView behaviour (window.open / target=_blank). Capacitor is loaded
+ * only inside the effect so dev/SSR and Next static-path workers do not require
+ * `@capacitor/core` at module evaluation time.
+ */
 export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
-    // Only do this inside the native Capacitor app
-    if (!Capacitor.isNativePlatform()) return;
+    let cancelled = false;
+    let teardown: (() => void) | undefined;
 
-    // --- 1) Intercept window.open ------------------------------------------
-    const originalWindowOpen = window.open;
+    void (async () => {
+      const { Capacitor } = await import('@capacitor/core');
+      if (cancelled) return;
+      if (!Capacitor.isNativePlatform()) return;
 
-    (window as any).open = (
-      url: string | URL,
-      target?: string,
-      features?: string
-    ) => {
-      const finalUrl = typeof url === 'string' ? url : url.toString();
+      const originalWindowOpen = window.open;
 
-      try {
-        const u = new URL(finalUrl, window.location.href);
-        const isSameOrigin = u.origin === window.location.origin;
+      (window as any).open = (
+        url: string | URL,
+        target?: string,
+        features?: string
+      ) => {
+        const finalUrl = typeof url === 'string' ? url : url.toString();
 
-        // Same-origin URLs should stay INSIDE the WebView
-        if (isSameOrigin) {
-          window.location.href = u.toString();
-          return null;
+        try {
+          const u = new URL(finalUrl, window.location.href);
+          const isSameOrigin = u.origin === window.location.origin;
+
+          if (isSameOrigin) {
+            window.location.href = u.toString();
+            return null;
+          }
+
+          return originalWindowOpen
+            ? originalWindowOpen(finalUrl, target, features)
+            : null;
+        } catch {
+          return originalWindowOpen
+            ? originalWindowOpen(finalUrl as any, target, features)
+            : null;
         }
+      };
 
-        // Different origin (e.g. Stripe checkout) -> let system browser handle it
-        return originalWindowOpen
-          ? originalWindowOpen(finalUrl, target, features)
-          : null;
-      } catch {
-        // If URL parsing fails, fall back to original behaviour
-        return originalWindowOpen
-          ? originalWindowOpen(finalUrl as any, target, features)
-          : null;
-      }
-    };
+      const clickHandler = (event: MouseEvent) => {
+        const el = (event.target as HTMLElement | null)?.closest(
+          'a'
+        ) as HTMLAnchorElement | null;
 
-    // --- 2) Rewrite <a target="_blank"> for same-origin links -------------
-    const clickHandler = (event: MouseEvent) => {
-      const el = (event.target as HTMLElement | null)?.closest(
-        'a'
-      ) as HTMLAnchorElement | null;
+        if (!el) return;
 
-      if (!el) return;
+        const href = el.getAttribute('href');
+        if (!href) return;
 
-      const href = el.getAttribute('href');
-      if (!href) return;
+        if (/^(mailto:|tel:|sms:|geo:)/i.test(href)) return;
 
-      // Ignore special schemes (tel:, mailto:, etc.)
-      if (/^(mailto:|tel:|sms:|geo:)/i.test(href)) return;
+        try {
+          const url = new URL(href, window.location.href);
+          const isSameOrigin = url.origin === window.location.origin;
 
-      try {
-        const url = new URL(href, window.location.href);
-        const isSameOrigin = url.origin === window.location.origin;
-
-        if (isSameOrigin && el.target === '_blank') {
-          // Same-origin + _blank => keep inside WebView
-          event.preventDefault();
-          window.location.href = url.toString();
+          if (isSameOrigin && el.target === '_blank') {
+            event.preventDefault();
+            window.location.href = url.toString();
+          }
+        } catch {
+          // ignore parse errors
         }
-      } catch {
-        // ignore parse errors
+      };
+
+      document.addEventListener('click', clickHandler);
+
+      teardown = () => {
+        document.removeEventListener('click', clickHandler);
+        window.open = originalWindowOpen;
+      };
+
+      if (cancelled) {
+        teardown();
+        teardown = undefined;
       }
-    };
+    })();
 
-    document.addEventListener('click', clickHandler);
-
-    // Cleanup on unmount
     return () => {
-      document.removeEventListener('click', clickHandler);
-      window.open = originalWindowOpen;
+      cancelled = true;
+      teardown?.();
     };
   }, []);
 

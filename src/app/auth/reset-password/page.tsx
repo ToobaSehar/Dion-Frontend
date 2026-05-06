@@ -98,15 +98,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      backgroundImage: 'url(/360_F_281897358_3rj9ZBSZHo5s0L1ug7uuIHadSxh9Cc75.webp)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat'
-    }}>
-      {/* Background Image Opacity Overlay */}
-      <div className="absolute inset-0 bg-white/30 pointer-events-none"></div>
-
+    <div className="relative min-h-screen overflow-hidden bg-[#F6F6F4]">
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen py-4 px-2 sm:py-8 sm:px-4 pb-12 sm:pb-16">
         {/* Logo */}

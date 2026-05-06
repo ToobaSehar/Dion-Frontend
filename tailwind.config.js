@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  safelist: [
+    'min-h-bh-input',
+    'h-bh-input',
+    'min-h-bh-button',
+    'h-bh-button',
+  ],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -53,10 +59,12 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
-        avenir: ['var(--font-avenir)', 'sans-serif'],
-        'avenir-bold': ['var(--font-avenir-bold)', 'sans-serif'],
-        'avenir-regular': ['var(--font-avenir-regular)', 'sans-serif'],
+        sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        /** Legacy class names — same stack as Figma (Inter) for backwards-compatible markup */
+        inter: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        avenir: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'avenir-bold': ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'avenir-regular': ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],
@@ -72,11 +80,59 @@ module.exports = {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
+        /** Figma Foundations → Spacing (legacy numeric + `6377:74654` extended steps) */
+        '120': '30rem',
+        '140': '35rem',
+        '160': '40rem',
+        '180': '45rem',
+        '192': '48rem',
+        '256': '64rem',
+        '320': '80rem',
+        '360': '90rem',
+        '400': '100rem',
+        '480': '120rem',
+      },
+      maxWidth: {
+        /** Figma **Widths** (`6377:74654`) — `max-w-bh-*` via `bhMaxWidthContent` */
+        'bh-xs': '20rem',
+        'bh-sm': '24rem',
+        'bh-md': '30rem',
+        'bh-lg': '35rem',
+        'bh-xl': '40rem',
+        'bh-2xl': '48rem',
+        'bh-3xl': '64rem',
+        'bh-4xl': '80rem',
+        'bh-5xl': '90rem',
+        'bh-6xl': '100rem',
+        'bh-7xl': '120rem',
+        'bh-paragraph': '45rem',
+      },
+      minHeight: {
+        /** Figma input row (40px) — `BookingHubInputField`, selects, `.bh-input` */
+        'bh-input': 'var(--bh-input-height)',
+        /** Figma Button CTA (48px) — hub buttons, `.bh-cta` */
+        'bh-button': 'var(--bh-button-height)',
+      },
+      height: {
+        'bh-input': 'var(--bh-input-height)',
+        'bh-button': 'var(--bh-button-height)',
       },
       borderRadius: {
         'xl': '1rem',
         '2xl': '1.5rem',
         '3xl': '2rem',
+        /** Figma **Radius** (`6377:75052`) — `bhRounded('md')` → `rounded-bh-md` */
+        'bh-none': '0',
+        'bh-xxs': '0.125rem',
+        'bh-xs': '0.25rem',
+        'bh-sm': '0.375rem',
+        'bh-md': '0.5rem',
+        'bh-lg': '0.625rem',
+        'bh-xl': '0.75rem',
+        'bh-2xl': '1rem',
+        'bh-3xl': '1.25rem',
+        'bh-4xl': '1.5rem',
+        'bh-full': '9999px',
       },
       boxShadow: {
         'apple': '0 4px 16px 0 rgba(0, 0, 0, 0.1)',

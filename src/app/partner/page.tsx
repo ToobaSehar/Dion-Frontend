@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { partnerSubmitNewProperty } from '@/lib/partner-submit-property';
 import AddPropertyModal from '@/components/AddPropertyModal';
 import PropertyDetailsModal from '@/components/PropertyDetailsModal';
+import { PartnerAccountProfilePanel } from '@/components/partner-dashboard/PartnerAccountProfilePanel';
+import { BookingHubLinkDeleteButton, BookingHubPrimaryDeleteButton } from '@/components/booking-hub-button';
 
 interface Property {
   id: string;
@@ -114,9 +117,10 @@ interface BookedProperty {
   };
 }
 
-export default function PartnerDashboard() {
+function PartnerDashboardContent() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -173,6 +177,20 @@ export default function PartnerDashboard() {
       return;
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'my-properties' || tab === 'contact-info') {
+      setActiveTab(tab);
+    }
+    if (searchParams.get('openAddProperty') === '1') {
+      setIsAddPropertyModalOpen(true);
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('openAddProperty');
+      const qs = params.toString();
+      router.replace(qs ? `/partner?${qs}` : '/partner', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (user) {
@@ -487,109 +505,8 @@ export default function PartnerDashboard() {
 
   const handleAddProperty = async (propertyData: any) => {
     try {
-      // Upload photos to Supabase Storage
-      let photoUrls: string[] = [];
-      
-      if (propertyData.photos && propertyData.photos.length > 0) {
-        for (let i = 0; i < propertyData.photos.length; i++) {
-          const file = propertyData.photos[i];
-          const fileName = `${user?.id}/${Date.now()}-${i}.${file.name.split('.').pop()}`;
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('property-photos')
-            .upload(fileName, file);
-          
-          if (uploadError) {
-            console.error('Error uploading photo:', uploadError);
-          } else {
-            // Get the public URL
-            const { data: { publicUrl } } = supabase.storage
-              .from('property-photos')
-              .getPublicUrl(fileName);
-            
-            photoUrls.push(publicUrl);
-          }
-        }
-      }
-      
-      const { data, error } = await supabase
-        .from('properties')
-        .insert({
-          // Basic Details
-          landlord_id: user?.id,
-          property_name: propertyData.propertyName,
-          house_address: propertyData.houseAddress,
-          locality: propertyData.locality || null,
-          city: propertyData.city,
-          county: propertyData.county,
-          country: propertyData.country,
-          postcode: propertyData.postcode,
-          property_type: propertyData.propertyType,
-          bedrooms: propertyData.bedrooms,
-          beds: propertyData.beds,
-          beds_breakdown: propertyData.bedsBreakdown || null,
-          bathrooms: propertyData.bathrooms,
-          max_occupancy: propertyData.maxOccupancy,
-          parking_type: propertyData.parkingType || null,
-          
-          // Photos
-          photos: photoUrls,
-          
-          // Amenities
-          workspace_desk: propertyData.workspaceDesk,
-          high_speed_wifi: propertyData.highSpeedWifi,
-          smart_tv: propertyData.smartTv,
-          fully_equipped_kitchen: propertyData.fullyEquippedKitchen,
-          living_dining_space: propertyData.livingDiningSpace,
-          washing_machine: propertyData.washingMachine,
-          iron_ironing_board: propertyData.ironIroningBoard,
-          linen_towels_provided: propertyData.linenTowelsProvided,
-          consumables_provided: propertyData.consumablesProvided,
-          
-          // Safety & Compliance
-          smoke_alarm: propertyData.smokeAlarm,
-          co_alarm: propertyData.coAlarm,
-          fire_extinguisher_blanket: propertyData.fireExtinguisherBlanket,
-          epc: propertyData.epc,
-          gas_safety_certificate: propertyData.gasSafetyCertificate,
-          eicr: propertyData.eicr,
-          
-          // Additional Information
-          additional_info: propertyData.additionalInfo || null,
-          
-          // VAT Details, Comments, Airbnb
-          vat_details: propertyData.vatDetails || null,
-          comments: propertyData.comments || null,
-          airbnb: propertyData.airbnb || null,
-          
-          // Payment Method
-          payment_method: propertyData.paymentMethod?.preferredPaymentMethod || null,
-          bank_name: propertyData.paymentMethod?.bankName || null,
-          account_holder_name: propertyData.paymentMethod?.accountHolderName || null,
-          sort_code: propertyData.paymentMethod?.sortCode || null,
-          account_number: propertyData.paymentMethod?.accountNumber || null,
-          
-          // Pricing (set default values)
-          weekly_rate: null,
-          monthly_rate: null,
-          bills_included: false,
-          
-          // Status
-          is_available: true,
-          activity: 'active',
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding property:', error);
-        throw error;
-      }
-
-      // Add the new property to the state
+      const data = (await partnerSubmitNewProperty(user?.id, propertyData)) as unknown as Property;
       setProperties([data, ...properties]);
-      
-      // Switch to dashboard to show the new property
       setActiveTab('dashboard');
     } catch (error) {
       console.error('Error adding property:', error);
@@ -828,7 +745,7 @@ export default function PartnerDashboard() {
             </div>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 <button 
-                  onClick={() => setActiveTab('add-property')}
+                  onClick={() => setIsAddPropertyModalOpen(true)}
                   className="w-full sm:w-auto text-white px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5 rounded-lg transition-all duration-200 font-avenir font-medium tracking-wide font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
                   style={{ background: 'linear-gradient(to right, #00BAB5, rgba(0, 186, 181, 0.54))' }}
                 >
@@ -1116,16 +1033,19 @@ export default function PartnerDashboard() {
                                   >
                                     {property.activity === 'active' ? 'Delist' : 'List'}
                           </button>
-                          <button 
+                          <BookingHubLinkDeleteButton
+                                    type="button"
+                                    size="sm"
+                                    contentSized
+                                    className="block h-auto min-h-0 w-full justify-start rounded-none px-4 py-2 text-left text-xs sm:text-base [&:focus-visible]:z-10"
                                     onClick={() => {
                                       setPropertyToDelete(property.id);
                                       setIsDeletePropertyModalOpen(true);
                                       setOpenDropdownId(null);
                                     }}
-                                    className="block w-full text-left px-4 py-2 text-xs sm:text-base font-avenir text-red-600 hover:bg-gray-100" style={{fontSize: '14px'}}
                           >
                             Delete
-                          </button>
+                          </BookingHubLinkDeleteButton>
                         </div>
                               </div>
                             )}
@@ -1185,9 +1105,19 @@ export default function PartnerDashboard() {
       case 'my-properties':
         return (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-avenir-bold font-bold text-booking-dark">All My Properties</h2>
-              <p className="text-sm sm:text-base font-avenir font-medium tracking-wide text-booking-gray">Manage all your property listings</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-avenir-bold font-bold text-booking-dark">All My Properties</h2>
+                <p className="text-sm sm:text-base font-avenir font-medium tracking-wide text-booking-gray">Manage all your property listings</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddPropertyModalOpen(true)}
+                className="w-full sm:w-auto shrink-0 text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg transition-all duration-200 font-avenir font-bold tracking-wide text-sm sm:text-base shadow-lg hover:shadow-xl whitespace-nowrap"
+                style={{ background: 'linear-gradient(to right, #00BAB5, rgba(0, 186, 181, 0.54))' }}
+              >
+                Add Property
+              </button>
             </div>
 
             {properties.length > 0 ? (
@@ -1330,102 +1260,27 @@ export default function PartnerDashboard() {
 
       case 'contact-info':
         return (
-          <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-avenir-bold font-bold text-booking-dark">Contact Information</h2>
-              <p className="text-sm sm:text-base font-avenir font-medium tracking-wide text-booking-gray">Manage your contact details and preferences</p>
-            </div>
-
-            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg border border-gray-100">
-              <div className="space-y-4 sm:space-y-6">
-                <div>
-                  <input 
-                    type="text" 
-                    value={partnerFullName} 
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="email" 
-                    value={displayUser?.email || ''} 
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="tel" 
-                    value={contactInfo.phone}
-                    onChange={(e) => setContactInfo(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="Enter phone number"
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="text" 
-                    value={contactInfo.company_name}
-                    onChange={(e) => setContactInfo(prev => ({ ...prev, company_name: e.target.value }))}
-                    placeholder="Enter company name"
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="email" 
-                    value={contactInfo.company_email}
-                    onChange={(e) => setContactInfo(prev => ({ ...prev, company_email: e.target.value }))}
-                    placeholder="Enter company email"
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <textarea 
-                    value={contactInfo.company_address}
-                    onChange={(e) => setContactInfo(prev => ({ ...prev, company_address: e.target.value }))}
-                    placeholder="Enter company address"
-                    rows={3}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent resize-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-booking-dark mb-2">Role</label>
-                  <input 
-                    type="text" 
-                    value="Partner" 
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular border border-gray-300 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
-                    readOnly
-                  />
-                </div>
-                <div className="pt-3 sm:pt-4">
-                  <button 
-                    onClick={handleContactInfoUpdate}
-                    className="w-full sm:w-auto bg-booking-teal text-white px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-avenir-regular rounded-lg sm:rounded-xl hover:bg-opacity-90 transition-all duration-200 font-medium"
-                  >
-                    Update Information
-                  </button>
-                </div>
-
-                {/* Success Message - Bottom */}
-                {updateSuccess && (
-                  <div className="mt-4 rounded-xl bg-green-50 border border-green-200 p-3 sm:p-4">
-                    <div className="text-xs sm:text-sm font-avenir-regular text-green-800">
-                      Information updated successfully
-                    </div>
-                  </div>
-                )}
-
-                {/* Error Message - Bottom */}
-                {updateError && (
-                  <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 sm:p-4">
-                    <div className="text-xs sm:text-sm font-avenir-regular text-red-800">{updateError}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <PartnerAccountProfilePanel
+            contactName={partnerFullName}
+            signInEmail={displayUser?.email ?? ''}
+            businessName={contactInfo.company_name}
+            onBusinessNameChange={(value) =>
+              setContactInfo((prev) => ({ ...prev, company_name: value }))
+            }
+            businessEmail={contactInfo.company_email}
+            onBusinessEmailChange={(value) =>
+              setContactInfo((prev) => ({ ...prev, company_email: value }))
+            }
+            phone={contactInfo.phone}
+            onPhoneChange={(value) => setContactInfo((prev) => ({ ...prev, phone: value }))}
+            businessAddress={contactInfo.company_address}
+            onBusinessAddressChange={(value) =>
+              setContactInfo((prev) => ({ ...prev, company_address: value }))
+            }
+            updateSuccess={updateSuccess}
+            updateError={updateError}
+            onSave={handleContactInfoUpdate}
+          />
         );
 
 
@@ -1535,7 +1390,7 @@ export default function PartnerDashboard() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span className="text-sm font-avenir font-medium tracking-wide">Contact Information</span>
+                  <span className="text-sm font-avenir font-medium tracking-wide">Account & Profile</span>
                   {activeTab === 'contact-info' && <div className="w-1 h-1 bg-booking-teal rounded-full ml-auto"></div>}
                 </div>
               </button>
@@ -1635,7 +1490,7 @@ export default function PartnerDashboard() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="text-sm lg:text-base font-medium">Contact Information</span>
+              <span className="text-sm lg:text-base font-medium">Account & Profile</span>
               {activeTab === 'contact-info' && <div className="w-1 h-1 bg-booking-teal rounded-full ml-auto"></div>}
             </div>
           </button>
@@ -1850,7 +1705,10 @@ export default function PartnerDashboard() {
                 >
                   Cancel
                 </button>
-                <button
+                <BookingHubPrimaryDeleteButton
+                  type="button"
+                  size="md"
+                  contentSized
                   onClick={() => {
                     if (propertyToDelete) {
                       handleDeleteProperty(propertyToDelete);
@@ -1858,14 +1716,9 @@ export default function PartnerDashboard() {
                       setPropertyToDelete(null);
                     }
                   }}
-                  className="px-6 py-2.5 rounded-xl font-avenir font-semibold text-white text-sm tracking-wide transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                    boxShadow: '0 4px 14px -2px rgba(239, 68, 68, 0.4)'
-                  }}
                 >
                   Yes, Delete
-                </button>
+                </BookingHubPrimaryDeleteButton>
               </div>
             </div>
           </div>
@@ -1885,5 +1738,19 @@ export default function PartnerDashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PartnerDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#F6F6F4]">
+          <p className="font-avenir-regular text-sm text-[#4B4E53]">Loading…</p>
+        </div>
+      }
+    >
+      <PartnerDashboardContent />
+    </Suspense>
   );
 }

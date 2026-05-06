@@ -1,56 +1,27 @@
 import { z } from 'zod';
 
-/** Step 1 — accommodation fields only (dates validated separately in the flow). */
+/** Step 1 shape — types only; no client-side field rules in the booking flow. */
 export const bookingRequestStep1Schema = z.object({
-  city: z.string().min(1, 'Please fill this field'),
-  projectPostcode: z.string().min(1, 'Please fill this field'),
-  teamSize: z.string().min(1, 'Please fill this field'),
+  city: z.string(),
+  projectPostcode: z.string(),
+  teamSize: z.string(),
 });
 
-const passwordStrength = z
-  .string()
-  .min(1, 'Please fill this field')
-  .superRefine((password, ctx) => {
-    const errors: string[] = [];
-    if (password.length < 8) errors.push('at least 8 characters');
-    if (!/[A-Z]/.test(password)) errors.push('an uppercase letter');
-    if (!/[a-z]/.test(password)) errors.push('a lowercase letter');
-    if (!/[0-9]/.test(password)) errors.push('a number');
-    if (!/[^A-Za-z0-9]/.test(password)) errors.push('a special character');
-    if (errors.length > 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Password must contain ${errors.join(', ')}.`,
-      });
-    }
-  });
-
-export const bookingRequestFormSchema = z
-  .object({
-    city: z.string().min(1, 'Please fill this field'),
-    projectPostcode: z.string().min(1, 'Please fill this field'),
-    teamSize: z.string().min(1, 'Please fill this field'),
-    budgetPerPerson: z.string().optional().default(''),
-    paymentFrequency: z.string().optional(),
-    specialRequirements: z.string().optional(),
-    name: z.string().min(1, 'Please fill this field'),
-    companyName: z.string().min(1, 'Please fill this field'),
-    email: z.string().min(1, 'Please fill this field').email('Please enter a valid email address.'),
-    phone: z.string().min(1, 'Please fill this field'),
-    password: passwordStrength,
-    confirmPassword: z.string().min(1, 'Please fill this field'),
-    termsAccepted: z.boolean().refine((v) => v === true, {
-      message: 'You must agree to the client terms and conditions',
-    }),
-  })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['confirmPassword'],
-        message: 'Passwords do not match. Please try again.',
-      });
-    }
-  });
+/** Booking request form shape — permissive strings/boolean for typing only (no Zod validation rules). */
+export const bookingRequestFormSchema = z.object({
+  city: z.string(),
+  projectPostcode: z.string(),
+  teamSize: z.string(),
+  budgetPerPerson: z.string().optional().default(''),
+  paymentFrequency: z.string().optional().default(''),
+  specialRequirements: z.string().optional().default(''),
+  name: z.string(),
+  companyName: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  password: z.string(),
+  confirmPassword: z.string(),
+  termsAccepted: z.boolean(),
+});
 
 export type BookingRequestFormValues = z.infer<typeof bookingRequestFormSchema>;

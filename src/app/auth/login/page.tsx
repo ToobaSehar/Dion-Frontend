@@ -4,10 +4,21 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { BookingHubInputField } from '@/components/BookingHubInputField';
+import { BH_INPUT_FIELD_ICON_COLOR } from '@/components/bookingHubInputFieldTypography';
+import { BookingHubPrimaryButton } from '@/components/booking-hub-button';
+import { BH_GRID_SHELL_CLASSES } from '@/components/booking-hub-grid';
+import { BookingHubSignUpPageShell } from '@/components/auth/BookingHubSignUpPageShell';
+import { AuthHubSegmentedTabs, BH_AUTH_HUB_PRIMARY_STACK_WIDTH } from '@/components/auth/AuthHubSegmentedTabs';
+import { BH_HUB_AUTH_CARD_WHITE } from '@/components/auth/bookingHubAuthCardShell';
+import { bhGap, bhMarginBottom, bhMarginTop, bhPadding, bhPaddingX, bhPaddingY, bhSpacing } from '@/components/booking-hub-space';
+import { bhRounded } from '@/components/booking-hub-radius';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -228,191 +239,235 @@ function LoginContent() {
     }
   };
 
+  const signUpPath = userType === 'landlord' ? '/auth/signup/partner' : '/auth/signup/client';
+  const logInHref = userType === 'landlord' ? '/auth/login?type=partner' : '/auth/login?type=client';
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background Image with Ken Burns effect */}
-      <div 
-        className="absolute inset-0 animate-ken-burns"
-        style={{
-          backgroundImage: 'url(/Houses%20-%202.webp)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      
-      {/* Background Image Opacity Overlay with fade animation */}
-      <div className="absolute inset-0 bg-[rgba(11,29,52,0.88)] pointer-events-none animate-overlay-fade"></div>
-
-      {/* Back Button */}
-      <Link 
-        href="/" 
-        onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
-        className="absolute top-4 left-4 z-20 flex items-center justify-center text-white sm:px-4 sm:py-2 sm:gap-2 font-semibold hover:text-booking-teal transition-all duration-200"
-        aria-label="Back to home"
-        style={{ fontFamily: 'var(--font-avenir-regular)' }}
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className="h-7 w-7" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span className="hidden sm:inline text-xl sm:text-2xl">Go Back</span>
-      </Link>
-
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen px-2 sm:px-4 pb-12 sm:pb-16 -mt-12 sm:-mt-16">
-        {/* Logo on Background with entrance animation */}
-        <div className="flex justify-center -mb-12 sm:-mb-16 lg:-mb-20">
-          <div className="animate-logo-entrance">
-            <Image
-              src="/white-teal.webp"
-              alt="Logo"
-              width={300}
-              height={300}
-              className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
-              priority
-            />
-          </div>
-        </div>
-
-        {/* Form Container with entrance animation */}
-        <div className="signup-card bg-white/95 backdrop-blur-sm rounded-xl sm:rounded shadow-xl sm:shadow-lg p-6 sm:p-6 lg:p-8 w-full max-w-xs sm:max-w-lg lg:max-w-2xl border border-gray-200/50 sm:border-gray-200 animate-card-entrance-1">
-          
-          {/* Form Title */}
-          <h1 className="text-base sm:text-2xl lg:text-3xl font-bold text-booking-dark mb-4 sm:mb-8 text-center leading-tight">
-            Sign In to Your Account
-          </h1>
-
-          <form className="space-y-3 sm:space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {error && (
-              <div className="rounded-xl bg-red-50 border border-red-200 p-3 sm:p-4">
-                <div className="text-xs sm:text-sm text-red-800" style={{ fontFamily: 'var(--font-avenir-regular)' }}>{error}</div>
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="rounded-xl bg-green-50 border border-green-200 p-3 sm:p-4">
-                <div className="text-xs sm:text-sm text-green-800" style={{ fontFamily: 'var(--font-avenir-regular)' }}>{successMessage}</div>
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-xs sm:text-lg font-medium text-booking-dark mb-1 sm:mb-2 leading-tight" style={{ fontFamily: 'var(--font-avenir)', fontWeight: 500, letterSpacing: '0.02em' }}>
-                Email Address
-              </label>
-              <input
-                {...register('email')}
-                type="email"
-                autoComplete="email"
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent ${errors.email ? 'border-red-500' : ''}`}
-                placeholder="Enter your email"
-                style={{ fontFamily: 'var(--font-avenir-regular)' }}
+    <main className={cn('font-avenir-regular text-[#0B1D37] antialiased')}>
+      <BookingHubSignUpPageShell variant="hubCard">
+        <>
+          <header className="flex w-full flex-col items-center">
+            <div className={cn('flex justify-center', bhMarginBottom('3xl'), 'md:mb-8')}>
+              <Image
+                src="/blue-teal-icon%20(1).webp"
+                alt="Booking Hub"
+                width={56}
+                height={64}
+                className="h-14 w-auto object-contain sm:h-16 md:h-[4.5rem]"
+                priority
               />
-              {errors.email && (
-                <p className="mt-1 text-xs sm:text-sm text-red-600" style={{ fontFamily: 'var(--font-avenir-regular)' }}>{errors.email.message}</p>
-              )}
             </div>
+            <div
+              className={cn(
+                'mx-auto w-full max-w-bh-xl text-center',
+                bhPaddingX('xl'),
+                bhMarginTop('md'),
+                'md:mt-3',
+                bhGap('2'),
+              )}
+            >
+              <h1 className={cn('bh-h1 font-bold tracking-tight', bhMarginBottom('md'))}>Sign in</h1>
+              <p className="bh-lead">Welcome back to Booking Hub.</p>
+            </div>
+          </header>
 
-            <div>
-              <label htmlFor="password" className="block text-xs sm:text-lg font-medium text-booking-dark mb-1 sm:mb-2 leading-tight" style={{ fontFamily: 'var(--font-avenir)', fontWeight: 500, letterSpacing: '0.02em' }}>
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  {...register('password')}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  className={`w-full px-3 pr-10 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent ${errors.password ? 'border-red-500' : ''}`}
-                  placeholder="Enter your password"
-                  style={{ fontFamily: 'var(--font-avenir-regular)' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+          <div
+            className={cn(
+              BH_HUB_AUTH_CARD_WHITE,
+              'flex flex-col',
+              bhMarginTop('6'),
+              'md:mt-8',
+              bhGap('6'),
+              'md:gap-8',
+            )}
+          >
+            <AuthHubSegmentedTabs active="log-in" signUpHref={signUpPath} logInHref={logInHref} />
+
+            <form
+              className={cn(
+                'flex w-full flex-col',
+                bhGap('6'),
+                'md:gap-8',
+                BH_AUTH_HUB_PRIMARY_STACK_WIDTH,
+              )}
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              {error ? (
+                <div
+                  className={cn(
+                    'border border-red-200 bg-red-50',
+                    bhRounded('xl'),
+                    bhSpacing(bhPadding('3'), 'sm:p-4'),
                   )}
-                </button>
+                >
+                  <p className="bh-small text-center text-red-800 sm:text-sm">{error}</p>
+                </div>
+              ) : null}
+
+              {successMessage ? (
+                <div
+                  className={cn(
+                    'border border-green-200 bg-green-50 text-center',
+                    bhRounded('lg'),
+                    bhPadding('4'),
+                  )}
+                >
+                  <p className="bh-small text-center text-green-800 sm:text-sm">{successMessage}</p>
+                </div>
+              ) : null}
+
+              <div className={cn('flex w-full flex-col', bhGap('4'), 'md:gap-6')}>
+                <BookingHubInputField
+                  id="bh-login-email"
+                  type="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  label="Email"
+                  placeholder="Enter your email"
+                  error={errors.email?.message}
+                  size="md"
+                  icon={<Mail className="size-5 shrink-0 text-[#A4A7AE]" aria-hidden strokeWidth={2} />}
+                  {...register('email')}
+                />
+                <BookingHubInputField
+                  id="bh-login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  label="Password"
+                  placeholder="Enter your password"
+                  error={errors.password?.message}
+                  size="md"
+                  suffix={
+                    <button
+                      type="button"
+                      className={cn(
+                        'flex size-5 shrink-0 items-center justify-center p-0 outline-none transition-colors',
+                        bhRounded('md'),
+                        BH_INPUT_FIELD_ICON_COLOR,
+                        'hover:text-[#0b1d37] focus-visible:ring-2 focus-visible:ring-booking-teal focus-visible:ring-offset-2 focus-visible:ring-offset-white',
+                      )}
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="h-5 w-5"
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="h-5 w-5"
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                          />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
+                    </button>
+                  }
+                  {...register('password')}
+                />
               </div>
-              {errors.password && (
-                <p className="mt-1 text-xs sm:text-sm text-red-600" style={{ fontFamily: 'var(--font-avenir-regular)' }}>{errors.password.message}</p>
-              )}
-            </div>
 
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <Link 
-                href="/auth/forgot-password" 
-                onClick={(e) => { e.preventDefault(); window.location.href = '/auth/forgot-password'; }}
-                className="text-xs sm:text-sm text-booking-teal hover:text-booking-dark font-medium"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="signup-btn w-full bg-booking-teal text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded hover:bg-opacity-90 text-sm sm:text-lg"
-                style={{ fontFamily: 'var(--font-avenir-regular)' }}
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
-                    Signing in...
-                  </div>
-                ) : (
-                  'Sign In'
-                )}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-xs sm:text-sm text-booking-gray">
-                Don't have an account?{' '}
-                <Link 
-                  href={`/auth/signup/${userType === 'contractor' ? 'client' : userType === 'landlord' ? 'partner' : userType}`} 
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    const signupPath = `/auth/signup/${userType === 'contractor' ? 'client' : userType === 'landlord' ? 'partner' : userType}`;
-                    window.location.href = signupPath;
+              <div className="text-right">
+                <Link
+                  href="/auth/forgot-password"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = '/auth/forgot-password';
                   }}
-                  className="text-booking-teal hover:text-booking-dark font-medium"
+                  className="bh-small font-semibold text-booking-teal hover:text-booking-dark hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
+              <BookingHubPrimaryButton
+                type="submit"
+                fullWidth
+                responsive
+                disabled={loading}
+                loading={loading}
+                loadingText="Signing in…"
+              >
+                Sign in
+              </BookingHubPrimaryButton>
+
+              <p
+                className={cn(
+                  'flex flex-wrap items-center justify-center text-center font-avenir-regular text-sm font-normal leading-5 text-[#535862]',
+                  bhGap('1'),
+                  BH_AUTH_HUB_PRIMARY_STACK_WIDTH,
+                )}
+              >
+                <span>Don&apos;t have an account?</span>
+                <Link
+                  href={signUpPath}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = signUpPath;
+                  }}
+                  className="font-semibold text-[#008884] hover:underline"
                 >
                   Create one here
                 </Link>
               </p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
+              <p className={cn('text-center', BH_AUTH_HUB_PRIMARY_STACK_WIDTH)}>
+                <Link
+                  href="/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = '/';
+                  }}
+                  className="bh-small font-semibold text-[#717680] hover:text-booking-dark hover:underline"
+                >
+                  ← Go back to home
+                </Link>
+              </p>
+            </form>
+          </div>
+        </>
+      </BookingHubSignUpPageShell>
+    </main>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-booking-teal"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div
+          className={cn(
+            'flex min-h-[100svh] items-center justify-center bg-booking-bg font-avenir-regular text-[#0B1D37] antialiased',
+            BH_GRID_SHELL_CLASSES,
+            bhSpacing(bhPaddingY('3xl'), 'sm:py-8'),
+          )}
+        >
+          <div className="h-12 w-12 animate-spin rounded-bh-full border-b-2 border-booking-teal" />
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

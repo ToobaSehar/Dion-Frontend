@@ -551,7 +551,7 @@
     justify-content: center;
     min-height: 100svh;
     padding: 1.5rem 1rem;
-    background-color: #f9fafb;
+    background-color: #f6f6f4;
   }
 
   @media (min-width: 640px) {

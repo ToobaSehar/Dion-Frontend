@@ -23,7 +23,7 @@ export default function Navbar() {
     if (!user) return '/';
     switch (user.role) {
       case 'contractor': return '/client';
-      case 'landlord':   return '/partner';
+      case 'landlord':   return '/partner/dashboard';
       case 'admin':      return '/admin';
       default:           return '/';
     }

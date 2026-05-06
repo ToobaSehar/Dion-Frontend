@@ -1,24 +1,47 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { createElement, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInDays } from 'date-fns';
 import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react';
-import type { FieldPath } from 'react-hook-form';
-import type { z } from 'zod';
-import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import SingleDatePicker from '@/components/SingleDatePicker';
-import { PaymentFrequencySelect } from '@/components/booking-request/PaymentFrequencySelect';
 import {
-  bookingRequestFormSchema,
-  bookingRequestStep1Schema,
-  type BookingRequestFormValues,
-} from '@/components/booking-request/bookingRequestSchema';
+  BookingHubLinkGrayButton,
+  BookingHubPrimaryButton,
+  BookingHubSecondaryButton,
+} from '@/components/booking-hub-button';
+import { BookingHubInputField } from '@/components/BookingHubInputField';
+import {
+  BH_INPUT_FIELD_CONTROL_SLOT,
+  BH_INPUT_FIELD_FILLED_TEXT,
+  BH_INPUT_FIELD_ICON_COLOR,
+  BH_INPUT_FIELD_PLACEHOLDER_TEXT,
+} from '@/components/bookingHubInputFieldTypography';
+import { BookingHubPasswordRequirementChecklist } from '@/components/client-signup/BookingHubPasswordRequirementChecklist';
+import { BookingHubTextAreaField } from '@/components/BookingHubTextAreaField';
+import {
+  BookingHubStepProgressIndicator,
+  type BookingHubStepProgressItem,
+} from '@/components/BookingHubStepProgressIndicator';
+import { PaymentFrequencySelect } from './PaymentFrequencySelect';
+import type { BookingRequestFormValues } from '@/components/booking-request/bookingRequestSchema';
+import { SSOButtons } from '@/components/SSOButtons';
+import { BH_GRID_GUTTER_GAP_CLASSES, BH_GRID_SHELL_CLASSES } from '@/components/booking-hub-grid';
+import {
+  bhGap,
+  bhMarginBottom,
+  bhMarginTop,
+  bhPadding,
+  bhPaddingX,
+  bhPaddingY,
+  bhSpacing,
+  bhSpaceY,
+} from '@/components/booking-hub-space';
+import { bhRounded, bhRoundedSurfaceCard } from '@/components/booking-hub-radius';
 
 interface Booking {
   id: string;
@@ -27,6 +50,12 @@ interface Booking {
 }
 
 const initialBooking: Booking = { id: '1', startDate: '', endDate: '' };
+
+const BOOKING_REQUEST_PROGRESS_STEPS: BookingHubStepProgressItem[] = [
+  { title: 'Accommodation details' },
+  { title: 'Your details' },
+  { title: 'Account' },
+];
 
 const defaultValues: BookingRequestFormValues = {
   city: '',
@@ -70,46 +99,60 @@ function totalNightsAcrossBookings(bookings: Booking[]): number {
   return total;
 }
 
-function bookingDateFieldErrors(bookings: Booking[]): Record<string, string> {
-  const hasValidBooking = bookings.some((b) => b.startDate && b.endDate);
-  const errors: Record<string, string> = {};
-  if (!hasValidBooking) {
-    bookings.forEach((booking) => {
-      if (!booking.startDate) {
-        errors[`startDate-${booking.id}`] = 'Please fill this field';
-      }
-      if (!booking.endDate) {
-        errors[`endDate-${booking.id}`] = 'Please fill this field';
-      }
-    });
-  }
-  return errors;
-}
-
-function applyZodFlattenToForm<T extends BookingRequestFormValues>(
-  setError: (name: FieldPath<T>, error: { message: string }) => void,
-  zodError: z.ZodError,
-) {
-  const { fieldErrors } = zodError.flatten();
-  (Object.entries(fieldErrors) as [keyof BookingRequestFormValues, string[] | undefined][]).forEach(
-    ([key, msgs]) => {
-      if (msgs?.[0]) {
-        setError(key as FieldPath<T>, { message: msgs[0] });
-      }
-    },
+function BookingRequestPasswordEyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-5 w-5"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+      />
+    </svg>
+  ) : (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="h-5 w-5"
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
   );
 }
 
-export default function BookingRequestFlow() {
+export type BookingRequestFlowProps = {
+  variant?: 'page' | 'clientPortalShell';
+};
+
+export default function BookingRequestFlow(props: BookingRequestFlowProps = {}) {
+  const variant = props.variant ?? 'page';
+  const isEmbedded = variant === 'clientPortalShell';
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2>(1);
+  const pathname = usePathname();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [bookings, setBookings] = useState<Booking[]>([initialBooking]);
   const [openCalendarFor, setOpenCalendarFor] = useState<{ bookingId: string; field: 'start' | 'end' } | null>(
     null,
   );
   const [showThankYou, setShowThankYou] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,20 +160,17 @@ export default function BookingRequestFlow() {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
   const [resendSuccess, setResendSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    setError,
     clearErrors,
     reset,
     control,
     formState: { errors },
   } = useForm<BookingRequestFormValues>({
-    resolver: zodResolver(bookingRequestFormSchema),
     defaultValues,
     mode: 'onSubmit',
   });
@@ -144,8 +184,6 @@ export default function BookingRequestFlow() {
   const guestsNum = parseInt(watchedTeamSize || '', 10) || 0;
   const budgetNum = parseFloat(watchedBudget || '') || 0;
   const estimatedTotal = nights * budgetNum;
-
-  const stepLabel = step === 1 ? 'Accommodation Details' : 'Your Details';
 
   const addBooking = () => {
     setBookings((prev) => [
@@ -169,97 +207,21 @@ export default function BookingRequestFlow() {
   const handleDateSelect = (bookingId: string, field: 'startDate' | 'endDate', date: string) => {
     updateBooking(bookingId, field, date);
     setOpenCalendarFor(null);
-    setFieldErrors((prev) => {
-      const next = { ...prev };
-      delete next[`${field}-${bookingId}`];
-      return next;
-    });
   };
 
   const handleStep1Next = () => {
-    clearErrors();
-    setFieldErrors({});
-    const values = watch();
-    const s1 = bookingRequestStep1Schema.safeParse({
-      city: values.city,
-      projectPostcode: values.projectPostcode,
-      teamSize: values.teamSize,
-    });
-    if (!s1.success) {
-      applyZodFlattenToForm(setError, s1.error);
-      return;
-    }
-    const dateErrs = bookingDateFieldErrors(bookings);
-    if (Object.keys(dateErrs).length > 0) {
-      setFieldErrors(dateErrs);
-      return;
-    }
     setStep(2);
   };
 
   const onFinalSubmit = handleSubmit(async (data) => {
     setEmailError(null);
     setShowThankYou(false);
-    setFieldErrors({});
     setResendError(null);
     setResendSuccess(false);
 
-    const dateErrs = bookingDateFieldErrors(bookings);
-    if (Object.keys(dateErrs).length > 0) {
-      setFieldErrors(dateErrs);
-      return;
-    }
     setIsSubmitting(true);
 
     const normalizedEmail = data.email.toLowerCase().trim();
-    if (!normalizedEmail) {
-      setEmailError('Please enter a valid email address.');
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const { data: existingContractor, error: contractorCheckError } = await supabase
-        .from('contractor')
-        .select('id')
-        .eq('email', normalizedEmail)
-        .maybeSingle();
-
-      if (contractorCheckError) {
-        console.error('Error checking contractor table:', contractorCheckError);
-        setEmailError('This email is already in use, Try a different email.');
-        setIsSubmitting(false);
-        return;
-      }
-      if (existingContractor) {
-        setEmailError('This email is already in use, Try a different email.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      const { data: existingLandlord, error: landlordCheckError } = await supabase
-        .from('landlord')
-        .select('id')
-        .eq('email', normalizedEmail)
-        .maybeSingle();
-
-      if (landlordCheckError) {
-        console.error('Error checking landlord table:', landlordCheckError);
-        setEmailError('This email is already in use, Try a different email.');
-        setIsSubmitting(false);
-        return;
-      }
-      if (existingLandlord) {
-        setEmailError('This email is already in use, Try a different email.');
-        setIsSubmitting(false);
-        return;
-      }
-    } catch (emailCheckError) {
-      console.error('Email validation check failed:', emailCheckError);
-      setEmailError('This email is already in use, Try a different email.');
-      setIsSubmitting(false);
-      return;
-    }
 
     const bookingDates = bookings
       .filter((b) => b.startDate && b.endDate)
@@ -292,35 +254,24 @@ export default function BookingRequestFlow() {
         setShowThankYou(true);
         reset(defaultValues);
         setBookings([initialBooking]);
-        setStep(1);
+        setStep(3);
         setIsSubmitting(false);
       } else {
-        let errorData: { error?: string };
+        let message = 'Could not complete your request. Please try again.';
         try {
-          errorData = await response.json();
+          const errorData = (await response.json()) as { error?: string };
+          if (errorData?.error && typeof errorData.error === 'string') {
+            message = errorData.error;
+          }
         } catch (parseError) {
           console.error('Error parsing response:', parseError);
-          setEmailError('This email is already in use, Try a different email.');
-          setIsSubmitting(false);
-          return;
         }
-        const errorMessage = errorData.error || 'Failed to submit booking request';
-        if (
-          errorMessage.includes('This email is already in use') ||
-          errorMessage.includes('duplicate') ||
-          errorMessage.includes('email') ||
-          errorMessage.includes('unique constraint') ||
-          errorMessage.includes('already exists')
-        ) {
-          setEmailError('This email is already in use, Try a different email.');
-        } else {
-          setEmailError(errorMessage);
-        }
+        setEmailError(message);
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Error submitting booking request:', error);
-      setEmailError('This email is already in use, Try a different email.');
+      setEmailError('Could not complete your request. Please try again.');
       setIsSubmitting(false);
     }
   });
@@ -376,62 +327,96 @@ export default function BookingRequestFlow() {
     ref: cityRef,
   } = register('city');
 
+  const formSurfaceClass = cn(
+    'w-full border border-solid border-[#e9eaeb] bg-white',
+    'shadow-[0_10px_15px_-3px_rgb(0_0_0/0.1),0_4px_6px_-4px_rgb(0_0_0/0.1)]',
+    bhRoundedSurfaceCard(),
+    bhSpacing(
+      bhPadding('2xl'),
+      'sm:p-6 md:p-8 lg:p-12 xl:p-14',
+      'max-w-[42rem] lg:max-w-[56rem] xl:max-w-bh-3xl',
+    ),
+  );
+
+  const brCtaTrackClass =
+    'mx-auto w-full sm:max-w-[calc((100%-1rem)/2)] md:max-w-[calc((100%-1.5rem)/2)]';
+
+  const brFieldGridClass = cn('grid grid-cols-1 sm:grid-cols-2', BH_GRID_GUTTER_GAP_CLASSES);
+
+  const pageLayoutInnerClass = cn(
+    'flex w-full flex-col items-center',
+    'justify-center md:justify-start',
+    BH_GRID_SHELL_CLASSES,
+    bhSpacing(bhPaddingY('3xl'), 'sm:py-8', 'md:py-12', 'lg:py-16'),
+  );
+
+  const embedLayoutInnerClass = cn(
+    'flex w-full flex-col items-center',
+    bhSpacing(bhPaddingY('3xl'), 'sm:py-8'),
+  );
+
+  const layoutInnerClass = isEmbedded ? embedLayoutInnerClass : pageLayoutInnerClass;
+
+  const rootClass = isEmbedded
+    ? 'w-full font-avenir text-[#0B1D37] antialiased'
+    : 'min-h-svh w-full bg-booking-bg font-avenir text-[#0B1D37] antialiased';
+
   return (
     <>
-      <main className="bh-page" style={{ fontFamily: 'var(--font-avenir-regular)' }}>
-        <div className="mb-6 flex justify-center md:mb-8">
-          <Image
-            src="/blue-teal.webp"
-            alt="Booking Hub"
-            width={280}
-            height={80}
-            className="bh-logo h-auto w-auto max-w-[220px] object-contain md:max-w-[260px]"
-            priority
+      {createElement(
+        isEmbedded ? 'div' : 'main',
+        {
+          className: rootClass,
+          style: { fontFamily: 'var(--font-avenir-regular)' },
+        },
+        <div className={layoutInnerClass}>
+          <div className={cn('flex justify-center', bhMarginBottom('3xl'), 'md:mb-8')}>
+        <Image
+          src="/blue-teal.webp"
+          alt="Booking Hub"
+          width={280}
+          height={80}
+          className="bh-logo h-auto w-auto max-w-[220px] object-contain md:max-w-[260px]"
+          priority
+        />
+      </div>
+
+      <div className={cn(formSurfaceClass, showModal && 'pointer-events-none blur-sm')}>
+        <div className="text-center">
+          <h1
+            className={cn('bh-h1 font-bold tracking-tight', bhMarginBottom('md'))}
+            style={{
+              color: '#0B1D37',
+              fontFamily: 'Avenir, Avenir LT Std, Nunito Sans, system-ui, -apple-system, sans-serif',
+            }}
+          >
+            New Booking Request
+          </h1>
+        </div>
+        <div className={cn('mx-auto text-center', bhMarginTop('md'), 'md:mt-3', bhPaddingX('xl'), 'max-w-bh-xl')}>
+          <p className="bh-lead" style={{ color: '#4B4E53' }}>
+            Tell us what you need and we&apos;ll find the best options
+          </p>
+        </div>
+
+        <div className={bhSpacing(bhMarginTop('6'), 'md:mt-8')}>
+          <BookingHubStepProgressIndicator
+            steps={BOOKING_REQUEST_PROGRESS_STEPS}
+            currentStep={step}
+            ariaLabel="New booking request steps"
+            className="max-w-full"
           />
         </div>
 
-        <div className={cn('bh-form-card', showModal && 'pointer-events-none blur-sm')}>
-          <div className="text-center">
-            <h1
-              className="bh-h1 mb-2 font-bold tracking-tight"
-              style={{
-                color: '#0B1D37',
-                fontFamily: 'Avenir, Avenir LT Std, Nunito Sans, system-ui, -apple-system, sans-serif',
-              }}
-            >
-              New Booking Request
-            </h1>
-          </div>
-          <div className="mx-auto mt-2 max-w-xl text-center md:mt-3">
-            <p className="bh-lead" style={{ color: '#4B4E53' }}>
-              Tell us what you need and we&apos;ll find the best options
-            </p>
-          </div>
-
-          <div className="mt-6 md:mt-8">
-            <p className="bh-body bh-text-primary text-center font-semibold">
-              Step {step} of 2 — {stepLabel}
-            </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
-              <div
-                className="h-full rounded-full transition-all duration-300"
-                style={{
-                  width: step === 1 ? '50%' : '100%',
-                  backgroundColor: '#00BAB5',
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 md:mt-8">
-            <form
-              className="space-y-6 md:space-y-8"
-              onSubmit={step === 1 ? (e) => e.preventDefault() : onFinalSubmit}
-              noValidate
-            >
+        <div className={bhSpacing(bhMarginTop('6'), 'md:mt-8')}>
+          <form
+            className={bhSpacing(bhSpaceY('6'), 'md:space-y-8')}
+            onSubmit={step === 3 ? onFinalSubmit : (e) => e.preventDefault()}
+            noValidate
+          >
             {step === 1 && (
               <>
-                <section className="space-y-4">
+                <section className={bhSpaceY('4')}>
                   <h2
                     className="bh-label uppercase tracking-wide font-semibold"
                     style={{ color: '#0B1D37' }}
@@ -439,17 +424,18 @@ export default function BookingRequestFlow() {
                     Location &amp; Dates
                   </h2>
                   <div>
-                    <input
+                    <BookingHubInputField
                       ref={cityRef}
+                      id="bh-br-city"
                       name={cityName}
                       onBlur={cityOnBlur}
                       type="text"
+                      label="Location"
                       placeholder="Start typing a city, town, or postcode..."
                       autoComplete="street-address"
-                      className={cn(
-                        'bh-input placeholder:text-muted-foreground',
-                        errors.city && 'bh-input-error',
-                      )}
+                      error={errors.city?.message}
+                      helperText="We'll search for properties near this location"
+                      size="md"
                       onChange={(e) => {
                         cityOnChange(e);
                         setValue('projectPostcode', e.target.value, { shouldDirty: true, shouldValidate: false });
@@ -457,14 +443,10 @@ export default function BookingRequestFlow() {
                         clearErrors('projectPostcode');
                       }}
                     />
-                    {errors.city && (
-                      <p className="bh-small mt-1 text-red-600">{errors.city.message}</p>
-                    )}
-                    <p className="bh-small bh-muted mt-1">We&apos;ll search for properties near this location</p>
                   </div>
 
                   {bookings.map((booking) => (
-                    <div key={booking.id} className="space-y-3">
+                    <div key={booking.id} className={bhSpaceY('3')}>
                       <div className="flex justify-end">
                         {bookings.length > 1 && (
                           <button
@@ -476,37 +458,42 @@ export default function BookingRequestFlow() {
                           </button>
                         )}
                       </div>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+                      <div className={brFieldGridClass}>
                         <div className="relative">
-                          <label
-                            className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                            style={{ color: '#0B1D37' }}
-                          >
-                            Check-in
-                          </label>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenCalendarFor({ bookingId: booking.id, field: 'start' });
-                            }}
-                            className={cn(
-                              'bh-input justify-between bg-background text-left',
-                              fieldErrors[`startDate-${booking.id}`] && 'bh-input-error',
-                            )}
-                          >
-                            <span className={booking.startDate ? 'bh-text-primary' : 'bh-muted'}>
-                              {booking.startDate
-                                ? formatDateForDisplay(booking.startDate)
-                                : 'Select date'}
-                            </span>
-                            <CalendarIcon className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
-                          </button>
-                          {fieldErrors[`startDate-${booking.id}`] && (
-                            <p className="bh-small mt-1 text-red-600">
-                              {fieldErrors[`startDate-${booking.id}`]}
-                            </p>
-                          )}
+                          <BookingHubInputField
+                            id={`bh-br-checkin-${booking.id}`}
+                            label="Check-in"
+                            size="md"
+                            control={
+                              <button
+                                type="button"
+                                id={`bh-br-checkin-${booking.id}`}
+                                className={cn(
+                                  BH_INPUT_FIELD_CONTROL_SLOT,
+                                  'flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-between gap-2 bg-transparent p-0 text-left outline-none ring-0 focus-visible:outline-none',
+                                )}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenCalendarFor({ bookingId: booking.id, field: 'start' });
+                                }}
+                              >
+                                <span
+                                  className={cn(
+                                    'min-w-0 flex-1 truncate',
+                                    booking.startDate ? BH_INPUT_FIELD_FILLED_TEXT : BH_INPUT_FIELD_PLACEHOLDER_TEXT,
+                                  )}
+                                >
+                                  {booking.startDate
+                                    ? formatDateForDisplay(booking.startDate)
+                                    : 'Select date'}
+                                </span>
+                                <CalendarIcon
+                                  className={cn('size-5 shrink-0', BH_INPUT_FIELD_ICON_COLOR)}
+                                  aria-hidden
+                                />
+                              </button>
+                            }
+                          />
                           {openCalendarFor?.bookingId === booking.id &&
                             openCalendarFor.field === 'start' && (
                               <SingleDatePicker
@@ -518,33 +505,38 @@ export default function BookingRequestFlow() {
                             )}
                         </div>
                         <div className="relative">
-                          <label
-                            className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                            style={{ color: '#0B1D37' }}
-                          >
-                            Check-out
-                          </label>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenCalendarFor({ bookingId: booking.id, field: 'end' });
-                            }}
-                            className={cn(
-                              'bh-input justify-between bg-background text-left',
-                              fieldErrors[`endDate-${booking.id}`] && 'bh-input-error',
-                            )}
-                          >
-                            <span className={booking.endDate ? 'bh-text-primary' : 'bh-muted'}>
-                              {booking.endDate ? formatDateForDisplay(booking.endDate) : 'Select date'}
-                            </span>
-                            <CalendarIcon className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
-                          </button>
-                          {fieldErrors[`endDate-${booking.id}`] && (
-                            <p className="bh-small mt-1 text-red-600">
-                              {fieldErrors[`endDate-${booking.id}`]}
-                            </p>
-                          )}
+                          <BookingHubInputField
+                            id={`bh-br-checkout-${booking.id}`}
+                            label="Check-out"
+                            size="md"
+                            control={
+                              <button
+                                type="button"
+                                id={`bh-br-checkout-${booking.id}`}
+                                className={cn(
+                                  BH_INPUT_FIELD_CONTROL_SLOT,
+                                  'flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-between gap-2 bg-transparent p-0 text-left outline-none ring-0 focus-visible:outline-none',
+                                )}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenCalendarFor({ bookingId: booking.id, field: 'end' });
+                                }}
+                              >
+                                <span
+                                  className={cn(
+                                    'min-w-0 flex-1 truncate',
+                                    booking.endDate ? BH_INPUT_FIELD_FILLED_TEXT : BH_INPUT_FIELD_PLACEHOLDER_TEXT,
+                                  )}
+                                >
+                                  {booking.endDate ? formatDateForDisplay(booking.endDate) : 'Select date'}
+                                </span>
+                                <CalendarIcon
+                                  className={cn('size-5 shrink-0', BH_INPUT_FIELD_ICON_COLOR)}
+                                  aria-hidden
+                                />
+                              </button>
+                            }
+                          />
                           {openCalendarFor?.bookingId === booking.id &&
                             openCalendarFor.field === 'end' && (
                               <SingleDatePicker
@@ -561,65 +553,51 @@ export default function BookingRequestFlow() {
                     </div>
                   ))}
 
-                  <button type="button" onClick={addBooking} className="bh-cta-add">
+                  <BookingHubSecondaryButton
+                    type="button"
+                    responsive
+                    contentSized
+                    onClick={addBooking}
+                  >
                     + Add Booking
-                  </button>
+                  </BookingHubSecondaryButton>
                 </section>
 
-                <section className="space-y-4">
+                <section className={bhSpaceY('4')}>
                   <h2
                     className="bh-label uppercase tracking-wide font-semibold"
                     style={{ color: '#0B1D37' }}
                   >
                     Guests &amp; Budget
                   </h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+                  <div className={brFieldGridClass}>
                     <div>
-                      <label
-                        className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                        style={{ color: '#0B1D37' }}
-                      >
-                        Number of guests
-                      </label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-team-size"
                         type="text"
                         inputMode="numeric"
+                        label="Number of guests"
                         placeholder="e.g. 2"
-                        className={cn(
-                          'bh-input placeholder:text-muted-foreground',
-                          errors.teamSize && 'bh-input-error',
-                        )}
+                        error={errors.teamSize?.message}
+                        size="md"
                         {...register('teamSize', {
                           onChange: () => clearErrors('teamSize'),
                         })}
                       />
-                      {errors.teamSize && (
-                        <p className="bh-small mt-1 text-red-600">{errors.teamSize.message}</p>
-                      )}
                     </div>
                     <div>
-                      <label
-                        className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                        style={{ color: '#0B1D37' }}
-                      >
-                        Budget per night (£)
-                      </label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-budget"
                         type="text"
                         inputMode="decimal"
+                        label="Budget per night (£)"
                         placeholder="e.g. 75"
-                        className="bh-input placeholder:text-muted-foreground"
+                        size="md"
                         {...register('budgetPerPerson')}
                       />
                     </div>
                   </div>
                   <div>
-                    <label
-                      className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                      style={{ color: '#0B1D37' }}
-                    >
-                      Payment frequency
-                    </label>
                     <Controller
                       name="paymentFrequency"
                       control={control}
@@ -627,7 +605,7 @@ export default function BookingRequestFlow() {
                         <PaymentFrequencySelect
                           ref={field.ref}
                           value={field.value ?? ''}
-                          onChange={(v) => {
+                          onChange={(v: string) => {
                             field.onChange(v);
                             clearErrors('paymentFrequency');
                           }}
@@ -638,7 +616,7 @@ export default function BookingRequestFlow() {
                   </div>
                 </section>
 
-                <section className="space-y-3">
+                <section className={bhSpaceY('3')}>
                   <h2
                     className="bh-label uppercase tracking-wide font-semibold"
                     style={{ color: '#0B1D37' }}
@@ -646,16 +624,13 @@ export default function BookingRequestFlow() {
                     Additional Details
                   </h2>
                   <div>
-                    <label
-                      className="bh-label mb-1.5 block text-[0.8125rem] leading-normal md:text-sm md:leading-normal font-medium"
-                      style={{ color: '#0B1D37' }}
-                    >
-                      Special requirements
-                    </label>
-                    <textarea
+                    <BookingHubTextAreaField
+                      id="bh-br-special-requirements"
                       rows={4}
+                      label="Special requirements"
                       placeholder="e.g. Within 30 mins drive, parking for 2 cars, pet-friendly..."
-                      className="bh-input placeholder:text-muted-foreground"
+                      size="md"
+                      fieldType="default"
                       {...register('specialRequirements')}
                     />
                   </div>
@@ -687,293 +662,199 @@ export default function BookingRequestFlow() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleStep1Next}
-                  className="bh-cta"
-                  style={{ backgroundColor: 'rgb(0, 186, 181)', color: 'rgb(255, 255, 255)' }}
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </button>
+                <div className={brCtaTrackClass}>
+                  <BookingHubPrimaryButton
+                    type="button"
+                    fullWidth
+                    responsive
+                    onClick={handleStep1Next}
+                    iconTrailing={<ArrowRight className="h-4 w-4" aria-hidden />}
+                  >
+                    Next
+                  </BookingHubPrimaryButton>
+                </div>
               </>
             )}
 
             {step === 2 && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="bh-small flex items-center gap-1 font-semibold text-[#00BAB5] hover:text-[#0B1D37]"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to accommodation
-                </button>
-
-                <section className="space-y-4">
+                <section className={bhSpaceY('4')}>
                   <h2 className="bh-card-title">Your details</h2>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+                  <div className={brFieldGridClass}>
                     <div>
-                      <label className="bh-label mb-1.5 block">Name *</label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-name"
                         type="text"
-                        className={cn('bh-input', errors.name && 'bh-input-error')}
+                        label="Name"
+                        required
                         placeholder="Full name"
+                        error={errors.name?.message}
+                        size="md"
                         {...register('name', { onChange: () => clearErrors('name') })}
                       />
-                      {errors.name && (
-                        <p className="bh-small mt-1 text-red-600">{errors.name.message}</p>
-                      )}
                     </div>
                     <div>
-                      <label className="bh-label mb-1.5 block">
-                        Company Name *
-                      </label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-company-name"
                         type="text"
-                        className={cn('bh-input', errors.companyName && 'bh-input-error')}
+                        label="Company Name"
+                        required
                         placeholder="Company name"
+                        error={errors.companyName?.message}
+                        size="md"
                         {...register('companyName', { onChange: () => clearErrors('companyName') })}
                       />
-                      {errors.companyName && (
-                        <p className="bh-small mt-1 text-red-600">{errors.companyName.message}</p>
-                      )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+                  <div className={brFieldGridClass}>
                     <div>
-                      <label className="bh-label mb-1.5 block">
-                        Company Email *
-                      </label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-company-email"
                         type="email"
-                        className={cn('bh-input', errors.email && 'bh-input-error')}
+                        label="Company Email"
+                        required
                         placeholder="email@company.com"
+                        error={errors.email?.message}
+                        size="md"
                         {...register('email', { onChange: () => clearErrors('email') })}
                       />
-                      {errors.email && (
-                        <p className="bh-small mt-1 text-red-600">{errors.email.message}</p>
-                      )}
                     </div>
                     <div>
-                      <label className="bh-label mb-1.5 block">Phone *</label>
-                      <input
+                      <BookingHubInputField
+                        id="bh-br-phone"
                         type="tel"
-                        className={cn('bh-input', errors.phone && 'bh-input-error')}
+                        label="Phone"
+                        required
                         placeholder="Phone number"
+                        error={errors.phone?.message}
+                        size="md"
                         {...register('phone', { onChange: () => clearErrors('phone') })}
                       />
-                      {errors.phone && (
-                        <p className="bh-small mt-1 text-red-600">{errors.phone.message}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
-                    <div>
-                      <label className="bh-label mb-1.5 block">Password *</label>
-                      <div className="relative isolate">
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          className={cn('bh-input pr-10', errors.password && 'bh-input-error')}
-                          placeholder="Create a password"
-                          {...register('password', { onChange: () => clearErrors('password') })}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((s) => !s)}
-                          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showPassword ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                      {errors.password && (
-                        <p className="bh-small mt-1 text-red-600">{errors.password.message}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="bh-label mb-1.5 block">
-                        Confirm Password *
-                      </label>
-                      <div className="relative isolate">
-                        <input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          className={cn('bh-input pr-10', errors.confirmPassword && 'bh-input-error')}
-                          placeholder="Confirm password"
-                          {...register('confirmPassword', {
-                            onChange: () => clearErrors('confirmPassword'),
-                          })}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword((s) => !s)}
-                          className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showConfirmPassword ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                      {errors.confirmPassword && (
-                        <p className="bh-small mt-1 text-red-600">{errors.confirmPassword.message}</p>
-                      )}
                     </div>
                   </div>
                 </section>
 
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                  <p
-                    className="mb-2 text-[10px] font-medium text-gray-600 sm:text-xs"
+                <div className={cn('mx-auto flex w-full flex-col', brCtaTrackClass, bhGap('4'))}>
+                  <BookingHubPrimaryButton
+                    type="button"
+                    fullWidth
+                    responsive
+                    onClick={() => setStep(3)}
+                    iconTrailing={<ArrowRight className="h-4 w-4" aria-hidden />}
+                  >
+                    Next
+                  </BookingHubPrimaryButton>
+                  <BookingHubLinkGrayButton
+                    type="button"
+                    fullWidth
+                    responsive
+                    iconLeading={<ArrowLeft className="h-4 w-4" aria-hidden />}
+                    onClick={() => setStep(1)}
+                  >
+                    Back to accommodation details
+                  </BookingHubLinkGrayButton>
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
+              <div className={cn('flex w-full flex-col', bhGap('5'), 'md:gap-6')}>
+                <section className={cn(bhSpaceY('3'), 'text-center')}>
+                  <h2
+                    className="bh-card-title text-[#0B1D37]"
                     style={{ fontFamily: 'var(--font-avenir-regular)' }}
                   >
-                    Password must contain:
+                    One last step
+                  </h2>
+                  <p className="bh-body text-[#535862]" style={{ fontFamily: 'var(--font-avenir-regular)' }}>
+                    Create a password to track your request and manage your bookings
                   </p>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 sm:gap-y-1.5">
-                    {[
-                      { ok: (watchedPassword || '').length >= 8, label: '8+ characters' },
-                      { ok: /[A-Z]/.test(watchedPassword || ''), label: 'Uppercase letter' },
-                      { ok: /[a-z]/.test(watchedPassword || ''), label: 'Lowercase letter' },
-                      { ok: /[0-9]/.test(watchedPassword || ''), label: 'Number' },
-                    ].map(({ ok, label }) => (
-                      <div key={label} className="flex items-center gap-1.5">
-                        <span
-                          className={cn(
-                            'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors sm:h-4 sm:w-4',
-                            ok ? 'bg-green-500' : 'bg-gray-300',
-                          )}
-                        >
-                          {ok ? (
-                            <svg
-                              className="h-2 w-2 text-white sm:h-2.5 sm:w-2.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          ) : (
-                            <span className="h-1 w-1 rounded-full bg-white sm:h-1.5 sm:w-1.5" />
-                          )}
-                        </span>
-                        <span
-                          className={cn(
-                            'text-[10px] transition-colors sm:text-xs',
-                            ok ? 'font-medium text-green-700' : 'text-gray-500',
-                          )}
-                          style={{ fontFamily: 'var(--font-avenir-regular)' }}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                    <div className="col-span-2 flex items-center gap-1.5">
-                      <span
-                        className={cn(
-                          'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full transition-colors sm:h-4 sm:w-4',
-                          /[^A-Za-z0-9]/.test(watchedPassword || '') ? 'bg-green-500' : 'bg-gray-300',
-                        )}
-                      >
-                        {/[^A-Za-z0-9]/.test(watchedPassword || '') ? (
-                          <svg
-                            className="h-2 w-2 text-white sm:h-2.5 sm:w-2.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <span className="h-1 w-1 rounded-full bg-white sm:h-1.5 sm:w-1.5" />
-                        )}
-                      </span>
-                      <span
-                        className={cn(
-                          'text-[10px] transition-colors sm:text-xs',
-                          /[^A-Za-z0-9]/.test(watchedPassword || '')
-                            ? 'font-medium text-green-700'
-                            : 'text-gray-500',
-                        )}
-                        style={{ fontFamily: 'var(--font-avenir-regular)' }}
-                      >
-                        Special character (!@#$%^&*)
-                      </span>
-                    </div>
-                  </div>
+                </section>
+
+                <div className={bhSpaceY('3')}>
+                  <SSOButtons role="client" returnTo={pathname ?? '/booking-request'} verb="continue" />
                 </div>
 
+                <div className={cn('relative flex items-center', bhGap('4'))}>
+                  <div className="h-px flex-1 bg-[#e9eaeb]" />
+                  <span className="bh-small shrink-0 text-[#535862]" style={{ fontFamily: 'var(--font-avenir-regular)' }}>
+                    or
+                  </span>
+                  <div className="h-px flex-1 bg-[#e9eaeb]" />
+                </div>
+
+                <section className={bhSpaceY('4')}>
+                  <div className={brFieldGridClass}>
+                    <div className={cn('flex min-w-0 flex-col items-stretch', bhGap('4'))}>
+                      <BookingHubInputField
+                        id="bh-br-password"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        label="Password"
+                        placeholder="Enter password"
+                        error={errors.password?.message}
+                        size="md"
+                        suffix={
+                          <button
+                            type="button"
+                            className={cn(
+                              'flex size-5 shrink-0 items-center justify-center p-0 outline-none transition-colors',
+                              bhRounded('md'),
+                              BH_INPUT_FIELD_ICON_COLOR,
+                              'hover:text-[#0b1d37] focus-visible:ring-2 focus-visible:ring-booking-teal focus-visible:ring-offset-2 focus-visible:ring-offset-booking-bg',
+                            )}
+                            onClick={() => setShowPassword((s) => !s)}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          >
+                            <BookingRequestPasswordEyeIcon open={showPassword} />
+                          </button>
+                        }
+                        {...register('password', { onChange: () => clearErrors('password') })}
+                      />
+                      <div className="flex w-full flex-col items-start pt-4">
+                        <BookingHubPasswordRequirementChecklist passwordStrengthPreview={watchedPassword ?? ''} />
+                      </div>
+                    </div>
+                    <div>
+                      <BookingHubInputField
+                        id="bh-br-confirm-password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        label="Confirm password"
+                        placeholder="Confirm password"
+                        error={errors.confirmPassword?.message}
+                        size="md"
+                        suffix={
+                          <button
+                            type="button"
+                            className={cn(
+                              'flex size-5 shrink-0 items-center justify-center p-0 outline-none transition-colors',
+                              bhRounded('md'),
+                              BH_INPUT_FIELD_ICON_COLOR,
+                              'hover:text-[#0b1d37] focus-visible:ring-2 focus-visible:ring-booking-teal focus-visible:ring-offset-2 focus-visible:ring-offset-booking-bg',
+                            )}
+                            onClick={() => setShowConfirmPassword((s) => !s)}
+                            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                          >
+                            <BookingRequestPasswordEyeIcon open={showConfirmPassword} />
+                          </button>
+                        }
+                        {...register('confirmPassword', {
+                          onChange: () => clearErrors('confirmPassword'),
+                        })}
+                      />
+                    </div>
+                  </div>
+                </section>
+
                 {showThankYou && (
-                  <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
+                  <div
+                    className={cn(
+                      'border border-green-200 bg-green-50 text-center',
+                      bhRounded('lg'),
+                      bhPadding('4'),
+                    )}
+                  >
                     <p
                       className="text-xs font-medium text-green-800 sm:text-base"
                       style={{ fontFamily: 'var(--font-avenir-regular)' }}
@@ -984,8 +865,8 @@ export default function BookingRequestFlow() {
                   </div>
                 )}
 
-                <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-start gap-2.5 sm:items-center sm:gap-3">
+                <div className={cn('flex w-full flex-col', bhGap('3'), 'pt-1')}>
+                  <div className={cn('flex w-full items-start', bhGap('3'))}>
                     <Controller
                       name="termsAccepted"
                       control={control}
@@ -999,8 +880,9 @@ export default function BookingRequestFlow() {
                             clearErrors('termsAccepted');
                           }}
                           className={cn(
-                            'mt-0.5 h-4 w-4 cursor-pointer rounded border-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#00BAB5] focus:ring-offset-2 sm:mt-0 sm:h-5 sm:w-5',
-                            errors.termsAccepted ? 'border-red-500' : 'border-gray-300',
+                            'mt-0.5 h-4 w-4 cursor-pointer border-2 focus:outline-none focus:ring-2 focus:ring-booking-teal focus:ring-offset-2 focus:ring-offset-booking-bg',
+                            bhRounded('md'),
+                            errors.termsAccepted ? 'border-red-500 text-red-600' : 'border-gray-300 text-booking-teal',
                           )}
                         />
                       )}
@@ -1008,68 +890,59 @@ export default function BookingRequestFlow() {
                     <label
                       htmlFor="termsAccepted"
                       className={cn(
-                        'cursor-pointer select-none text-xs leading-relaxed sm:text-sm',
+                        'bh-small cursor-pointer select-none leading-relaxed',
                         errors.termsAccepted ? 'text-red-700' : 'text-gray-700',
                       )}
-                      style={{ fontFamily: 'var(--font-avenir-regular)' }}
                     >
-                      I agree to{' '}
+                      I agree to the{' '}
                       <Link
                         href="/terms"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={cn(
-                          'font-medium underline transition-colors hover:no-underline',
-                          errors.termsAccepted
-                            ? 'text-red-600 hover:text-red-700'
-                            : 'text-[#00BAB5] hover:text-[#0B1D37]',
-                        )}
+                        className="font-medium text-booking-teal underline hover:text-booking-dark"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        client terms and conditions
+                        Booking Hub client terms and conditions
                       </Link>
+                      .
                     </label>
                   </div>
-                  {showThankYou && (
-                    <button
-                      type="button"
-                      onClick={handleResendEmail}
-                      disabled={resendLoading}
-                      className="whitespace-nowrap text-xs font-medium text-[#00BAB5] underline hover:text-[#0B1D37] disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg"
-                      style={{ fontFamily: 'var(--font-avenir-regular)' }}
-                    >
-                      {resendLoading ? 'Sending...' : 'Resend Confirmation Email'}
-                    </button>
-                  )}
+                  {showThankYou ? (
+                    <div className="flex w-full justify-end">
+                      <button
+                        type="button"
+                        onClick={handleResendEmail}
+                        disabled={resendLoading}
+                        className="whitespace-nowrap text-xs font-medium text-[#00BAB5] underline hover:text-[#0B1D37] disabled:cursor-not-allowed disabled:opacity-50 sm:text-lg"
+                        style={{ fontFamily: 'var(--font-avenir-regular)' }}
+                      >
+                        {resendLoading ? 'Sending...' : 'Resend Confirmation Email'}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
-                {resendError && (
+                {resendError ? (
                   <p className="bh-small text-red-600" style={{ fontFamily: 'var(--font-avenir-regular)' }}>
                     {resendError}
                   </p>
-                )}
-                {resendSuccess && (
+                ) : null}
+                {resendSuccess ? (
                   <p className="bh-small text-green-600" style={{ fontFamily: 'var(--font-avenir-regular)' }}>
                     Confirmation email resent successfully.
                   </p>
-                )}
-                {errors.termsAccepted && (
-                  <p
-                    className="bh-small flex items-start gap-1.5 text-red-600"
-                    style={{ fontFamily: 'var(--font-avenir-regular)' }}
-                  >
-                    <svg className="mt-0.5 h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>{errors.termsAccepted.message}</span>
-                  </p>
-                )}
+                ) : null}
+                {errors.termsAccepted ? (
+                  <p className="bh-small -mt-2 text-red-600">{errors.termsAccepted.message}</p>
+                ) : null}
 
-                {emailError && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-3 sm:p-4">
+                {emailError ? (
+                  <div
+                    className={cn(
+                      'border border-red-200 bg-red-50',
+                      bhRounded('xl'),
+                      bhSpacing(bhPadding('3'), 'sm:p-4'),
+                    )}
+                  >
                     <div
                       className="text-center text-xs text-red-800 sm:text-sm"
                       style={{ fontFamily: 'var(--font-avenir-regular)' }}
@@ -1077,42 +950,29 @@ export default function BookingRequestFlow() {
                       {emailError}
                     </div>
                   </div>
-                )}
+                ) : null}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bh-cta"
-                  style={{ backgroundColor: '#00BAB5', color: '#FFFFFF' }}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg
-                        className="-ml-1 h-5 w-5 animate-spin text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Booking Request'
-                  )}
-                </button>
+                <div className={cn('mx-auto flex w-full flex-col', brCtaTrackClass, bhGap('4'))}>
+                  <BookingHubPrimaryButton
+                    type="submit"
+                    fullWidth
+                    responsive
+                    loading={isSubmitting}
+                    loadingText="Creating account..."
+                    iconTrailing={<ArrowRight className="h-4 w-4" aria-hidden />}
+                  >
+                    Create Account
+                  </BookingHubPrimaryButton>
+                  <BookingHubLinkGrayButton
+                    type="button"
+                    fullWidth
+                    responsive
+                    iconLeading={<ArrowLeft className="h-4 w-4" aria-hidden />}
+                    onClick={() => setStep(2)}
+                  >
+                    Back to your details
+                  </BookingHubLinkGrayButton>
+                </div>
 
                 <p
                   className="bh-body bh-muted text-center"
@@ -1127,25 +987,33 @@ export default function BookingRequestFlow() {
                     }}
                     className="font-medium text-[#00BAB5] underline hover:text-[#0B1D37]"
                   >
-                    Sign in here
+                    Sign in
                   </a>
                 </p>
-              </>
+              </div>
             )}
             </form>
           </div>
         </div>
-      </main>
+      </div>,
+      )}
 
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex animate-overlay-fade items-center justify-center bg-black/50 p-3 backdrop-blur-sm sm:p-4"
+          className={cn(
+            'fixed inset-0 z-50 flex animate-overlay-fade items-center justify-center bg-black/50 backdrop-blur-sm',
+            bhSpacing(bhPadding('3'), 'sm:p-4'),
+          )}
           onClick={handleProceed}
           onKeyDown={(e) => e.key === 'Escape' && handleProceed()}
           role="presentation"
         >
           <div
-            className="relative w-full max-w-md animate-card-entrance-1 rounded-2xl bg-white p-6 shadow-2xl sm:max-w-3xl sm:p-8"
+            className={cn(
+              'relative w-full max-w-md animate-card-entrance-1 bg-white shadow-2xl sm:max-w-3xl',
+              bhRoundedSurfaceCard(),
+              bhSpacing(bhPadding('3xl'), 'sm:p-8'),
+            )}
             style={{ animationDelay: '0.1s' }}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
@@ -1156,7 +1024,10 @@ export default function BookingRequestFlow() {
             <button
               onClick={handleProceed}
               type="button"
-              className="absolute right-4 top-4 rounded-full p-1 transition-colors hover:bg-gray-100 sm:p-2"
+              className={cn(
+                'absolute right-4 top-4 p-1 transition-colors hover:bg-gray-100 sm:p-2',
+                bhRounded('full'),
+              )}
               aria-label="Close"
             >
               <svg className="h-5 w-5 text-gray-500 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1164,7 +1035,7 @@ export default function BookingRequestFlow() {
               </svg>
             </button>
 
-            <div className="mb-6 flex items-center justify-center">
+            <div className={cn('flex items-center justify-center', bhMarginBottom('6'))}>
               <Image
                 src="/blue-teal.webp"
                 alt="Booking Hub Logo"
@@ -1178,10 +1049,10 @@ export default function BookingRequestFlow() {
             <h2 id="booking-request-modal-title" className="sr-only">
               Continue as new or existing user
             </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+            <div className={cn('grid grid-cols-1 sm:grid-cols-2', BH_GRID_GUTTER_GAP_CLASSES)}>
               <div className="flex flex-col justify-between">
                 <p
-                  className="mb-3 text-center text-base leading-relaxed text-[#0B1D37] sm:text-lg"
+                  className={cn('text-center text-base leading-relaxed text-[#0B1D37] sm:text-lg', bhMarginBottom('3'))}
                   style={{ fontFamily: 'var(--font-avenir)', fontWeight: 500 }}
                 >
                   Already a user? Sign in to your account to <br />
@@ -1190,7 +1061,10 @@ export default function BookingRequestFlow() {
                 <button
                   onClick={handleSignIn}
                   type="button"
-                  className="w-full rounded-lg bg-[#00BAB5] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#009a96] focus:outline-none focus:ring-2 focus:ring-[#00BAB5] focus:ring-offset-2 sm:text-base"
+                  className={cn(
+                    'w-full bg-[#00BAB5] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#009a96] focus:outline-none focus:ring-2 focus:ring-[#00BAB5] focus:ring-offset-2 focus:ring-offset-white sm:text-base',
+                    bhRounded('lg'),
+                  )}
                   style={{ fontFamily: 'var(--font-avenir-regular)' }}
                 >
                   Sign in
@@ -1198,7 +1072,7 @@ export default function BookingRequestFlow() {
               </div>
               <div className="flex flex-col justify-between">
                 <p
-                  className="mb-4 text-center text-base leading-relaxed text-[#0B1D37] sm:text-lg"
+                  className={cn('text-center text-base leading-relaxed text-[#0B1D37] sm:text-lg', bhMarginBottom('4'))}
                   style={{ fontFamily: 'var(--font-avenir)', fontWeight: 500 }}
                 >
                   Requesting a booking as a New User?
@@ -1206,7 +1080,10 @@ export default function BookingRequestFlow() {
                 <button
                   onClick={handleProceed}
                   type="button"
-                  className="w-full rounded-lg border-2 border-[#0B1D37] bg-[#E9ECEF] px-6 py-3 text-sm font-semibold text-[#0B1D37] transition-colors hover:bg-[#dee2e6] focus:outline-none focus:ring-2 focus:ring-[#0B1D37] focus:ring-offset-2 sm:text-base"
+                  className={cn(
+                    'w-full border-2 border-[#0B1D37] bg-[#E9ECEF] px-6 py-3 text-sm font-semibold text-[#0B1D37] transition-colors hover:bg-[#dee2e6] focus:outline-none focus:ring-2 focus:ring-[#0B1D37] focus:ring-offset-2 focus:ring-offset-white sm:text-base',
+                    bhRounded('lg'),
+                  )}
                   style={{ fontFamily: 'var(--font-avenir-regular)' }}
                 >
                   Proceed

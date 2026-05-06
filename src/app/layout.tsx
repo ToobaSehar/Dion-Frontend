@@ -1,46 +1,16 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import localFont from 'next/font/local';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import StatusBarInit from './statusbar-init';
 import { AppShell } from './AppShell';   // 👈 NEW
 
-const inter = Inter({ subsets: ['latin'] });
-
-const avenirNext = localFont({
-  src: [
-    {
-      path: '../fonts/AvenirNextLTPro-Regular.otf',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/AvenirNextLTPro-MediumCn.otf',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../fonts/AvenirNextLTPro-Bold.otf',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-avenir',
-});
-
-const avenirBold = localFont({
-  src: '../fonts/AvenirNextLTPro-Bold.otf',
-  weight: '700',
-  style: 'normal',
-  variable: '--font-avenir-bold',
-});
-
-const avenirRegular = localFont({
-  src: '../fonts/AvenirNextLTPro-Regular.otf',
-  weight: '400',
-  style: 'normal',
-  variable: '--font-avenir-regular',
+/** Figma Foundations → Typography: Inter, weights 400 / 500 / 600 / 700 */
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -105,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`h-full ${avenirNext.variable} ${avenirBold.variable} ${avenirRegular.variable}`}>
+    <html lang="en" className={`h-full ${inter.variable}`}>
       {/* Next.js generates <meta name="viewport"> automatically from the
           exported `viewport` object above — do NOT add a manual one here or
           Safari will see two conflicting viewport tags and behave unpredictably. */}

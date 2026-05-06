@@ -781,7 +781,7 @@ export default function ContractorForm() {
                   value={formData.city}
                   onChange={handleInputChange}
                   placeholder="e.g. London"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                 />
               </div>
               <div>
@@ -794,7 +794,7 @@ export default function ContractorForm() {
                   name="projectPostcode"
                   value={formData.projectPostcode}
                   onChange={handleInputChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Enter postcode"
                 />
               </div>
@@ -827,7 +827,7 @@ export default function ContractorForm() {
                         type="date"
                         value={booking.startDate}
                         onChange={(e) => updateBooking(booking.id, 'startDate', e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                        className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                         required
                       />
                     </div>
@@ -839,7 +839,7 @@ export default function ContractorForm() {
                         type="date"
                         value={booking.endDate}
                         onChange={(e) => updateBooking(booking.id, 'endDate', e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                        className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                         required
                       />
                     </div>
@@ -850,7 +850,7 @@ export default function ContractorForm() {
                 <button
                   type="button"
                   onClick={addBooking}
-                  className="w-full sm:w-auto bg-booking-teal text-white px-4 py-2 rounded-md hover:bg-booking-dark transition-colors duration-200 text-xs sm:text-sm font-medium"
+                  className="box-border inline-flex h-bh-button w-full items-center justify-center rounded-md bg-booking-teal px-4 text-xs font-medium text-white transition-colors duration-200 hover:bg-booking-dark sm:w-auto sm:text-sm"
                 >
                   + Add Booking
                 </button>
@@ -870,7 +870,7 @@ export default function ContractorForm() {
                   value={formData.teamSize}
                   onChange={handleInputChange}
                   min="1"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Number of people"
                   required
                 />
@@ -886,7 +886,7 @@ export default function ContractorForm() {
                   value={selectedBudgetOption}
                   onChange={(e) => setSelectedBudgetOption(e.target.value)}
                   min="0"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Enter budget amount"
                 />
               </div>
@@ -904,7 +904,7 @@ export default function ContractorForm() {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Your full name"
                   required
                 />
@@ -919,7 +919,7 @@ export default function ContractorForm() {
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleInputChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Your company name"
                   required
                 />
@@ -938,7 +938,7 @@ export default function ContractorForm() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="your.email@company.com"
                   required
                 />
@@ -953,7 +953,7 @@ export default function ContractorForm() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent"
+                  className="box-border h-bh-input w-full px-3 text-sm border border-booking-teal rounded focus:outline-none focus:ring-2 focus:ring-booking-teal focus:border-transparent sm:px-4 sm:text-base"
                   placeholder="Your phone number"
                   required
                 />
@@ -993,7 +993,7 @@ export default function ContractorForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-booking-teal text-white py-3 sm:py-4 px-6 rounded-lg font-semibold text-sm sm:text-base hover:bg-booking-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-booking-teal focus:ring-offset-2 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                className="box-border flex h-bh-button w-full items-center justify-center rounded-lg bg-booking-teal px-6 text-sm font-semibold text-white transition-colors duration-200 hover:bg-booking-dark focus:outline-none focus:ring-2 focus:ring-booking-teal focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 sm:text-base"
               >
                 {isSubmitting ? (
                   <>
