@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { ChevronRight, Search } from 'lucide-react';
 
@@ -7,6 +8,7 @@ import {
   AdminPortalClientsSectorPills,
   type AdminPortalClientsSectorTab,
 } from '@/components/client-portal-figma/AdminPortalClientsSectorPills';
+import { adminPortalClientDetailHref } from '@/components/client-portal-figma/adminPortalFigmaMainView';
 import { cn } from '@/lib/utils';
 
 export type { AdminPortalClientsSectorTab } from '@/components/client-portal-figma/AdminPortalClientsSectorPills';
@@ -96,6 +98,10 @@ const MOCK_ROWS: AdminPortalClientTableRow[] = [
   },
 ];
 
+export function getAdminPortalClientMockRowById(id: string): AdminPortalClientTableRow | undefined {
+  return MOCK_ROWS.find((r) => r.id === id);
+}
+
 function rowMatchesSector(row: AdminPortalClientTableRow, tab: AdminPortalClientsSectorTab): boolean {
   if (tab === 'all') return true;
   return row.sectorKind === tab;
@@ -122,7 +128,7 @@ const thClass =
 const tdClass = 'font-avenir-regular px-4 py-3.5 text-sm leading-5 text-[#0B1D37] sm:px-5';
 
 /**
- * Admin **Clients** — search + sector pills (pills align end on large screens) and client directory table (static data).
+ * Admin **Clients** — search + sector pills in one horizontal row and client directory table (static data).
  * Active pill + View link use brand teal (`#00BAB5`) like other admin tables.
  */
 export function AdminPortalClientsView({ className, rows = MOCK_ROWS }: AdminPortalClientsViewProps) {
@@ -139,7 +145,7 @@ export function AdminPortalClientsView({ className, rows = MOCK_ROWS }: AdminPor
         Clients
       </h1>
 
-      <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+      <div className="mt-6 flex min-w-0 flex-row flex-nowrap items-center gap-4 sm:gap-6">
         <div className="relative min-w-0 flex-1">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-[#717680]"
@@ -155,7 +161,7 @@ export function AdminPortalClientsView({ className, rows = MOCK_ROWS }: AdminPor
             aria-label="Search clients"
           />
         </div>
-        <AdminPortalClientsSectorPills value={sector} onChange={setSector} className="min-w-0 shrink-0 lg:max-w-[52%]" />
+        <AdminPortalClientsSectorPills value={sector} onChange={setSector} className="shrink-0" />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-solid border-[#e9eaeb] bg-white shadow-[0_1px_2px_rgba(11,29,55,0.06)]">
@@ -195,13 +201,13 @@ export function AdminPortalClientsView({ className, rows = MOCK_ROWS }: AdminPor
                       </span>
                     </td>
                     <td className={cn(tdClass, 'pr-6 text-right')}>
-                      <button
-                        type="button"
+                      <Link
+                        href={adminPortalClientDetailHref(row.id)}
                         className="font-avenir-regular inline-flex items-center justify-end gap-0.5 text-sm font-semibold text-[#00BAB5] transition-colors hover:text-[#008884]"
                       >
                         View
                         <ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

@@ -15,6 +15,7 @@ export type { ClientPortalFigmaMainView } from './clientPortalFigmaMainView';
 export {
   CLIENT_PORTAL_HUB_MY_BOOKINGS_HREF,
   CLIENT_PORTAL_HUB_MY_REQUESTS_HREF,
+  CLIENT_PORTAL_HUB_PAYMENTS_HREF,
   CLIENT_PORTAL_HUB_VIEW_QUERY_KEY,
 } from './clientPortalFigmaMainView';
 export type { AdminPortalFigmaMainView } from './adminPortalFigmaMainView';
@@ -52,7 +53,7 @@ export {
   ADMIN_PORTAL_BOOKINGS_TAB_ITEMS,
 } from './AdminPortalBookingsStatusPills';
 export type { AdminPortalBookingsFilterTab, AdminPortalBookingsStatusPillsProps } from './AdminPortalBookingsStatusPills';
-export { AdminPortalBookingsView } from './AdminPortalBookingsView';
+export { AdminPortalBookingsView, getAdminPortalBookingMockRowById } from './AdminPortalBookingsView';
 export type {
   AdminPortalBookingRowStatus,
   AdminPortalBookingTableRow,
@@ -86,7 +87,7 @@ export {
   ADMIN_PORTAL_CLIENTS_SECTOR_TAB_ITEMS,
 } from './AdminPortalClientsSectorPills';
 export type { AdminPortalClientsSectorTab, AdminPortalClientsSectorPillsProps } from './AdminPortalClientsSectorPills';
-export { AdminPortalClientsView } from './AdminPortalClientsView';
+export { AdminPortalClientsView, getAdminPortalClientMockRowById } from './AdminPortalClientsView';
 export type {
   AdminPortalClientRowStatus,
   AdminPortalClientSectorKind,
@@ -126,7 +127,7 @@ export type { ClientPortalRequestDetailShortlistSectionProps } from './ClientPor
 export { CLIENT_PORTAL_SHORTLIST_TOTAL_EXC_VAT_GBP_BY_ID } from './ClientPortalRequestDetailShortlistSection';
 export { ClientPortalShortlistConfirmBar } from './ClientPortalShortlistConfirmBar';
 export type { ClientPortalShortlistConfirmBarProps } from './ClientPortalShortlistConfirmBar';
-export { AdminPortalPartnersView } from './AdminPortalPartnersView';
+export { AdminPortalPartnersView, getAdminPortalPartnerMockRowById } from './AdminPortalPartnersView';
 export type {
   AdminPortalPartnerRowStatus,
   AdminPortalPartnerTableRow,

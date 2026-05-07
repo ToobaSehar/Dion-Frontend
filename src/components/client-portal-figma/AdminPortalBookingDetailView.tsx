@@ -1,9 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AlertTriangle, ChevronRight, Eye, FileText, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Check, ChevronRight, Eye, FileText, Play, ShieldCheck } from 'lucide-react';
 
-import { BookingHubPrimaryButton, BookingHubSecondaryButton } from '@/components/booking-hub-button';
+import {
+  BookingHubPrimaryButton,
+  BookingHubSecondaryButton,
+  BookingHubTertiaryButton,
+} from '@/components/booking-hub-button';
 import { bhRounded } from '@/components/booking-hub-radius';
 import { bookingTableRowFromPaymentRow } from '@/components/client-portal-figma/adminPortalPaymentToBookingRow';
 import { PORTAL_DASHBOARD_SECTION_HEADING_CLASS } from '@/components/client-portal-figma/portalDashboardSectionHeading';
@@ -44,6 +48,70 @@ export type AdminBookingDetailContent = {
 };
 
 const DETAIL_BY_REFERENCE: Record<string, AdminBookingDetailContent> = {
+  'BK-2024-0891': {
+    reference: 'BK-2024-0891',
+    subtitle: 'Acme Council · James Davies · Victoria Apartments',
+    headerStatusLabel: 'Checked In',
+    headerStatusClass: 'rounded-full bg-[#0B1D37] text-white',
+    clientName: 'James Davies',
+    clientPhone: '+44 7700 900111',
+    clientEmail: 'j.davies@acme.gov.uk',
+    partnerName: 'City Living Ltd',
+    partnerContactName: 'Mark Thompson',
+    partnerEmail: 'mark@cityliving.co.uk',
+    property: 'Victoria Apartments',
+    checkIn: '1 Apr 2024',
+    checkOut: '30 Jun 2024',
+    nights: 91,
+    guests: 2,
+    totalExcVat: '£8,856',
+    paymentStatusLabel: 'Paid',
+    paymentStatusClass: 'bg-[#00BAB5] text-white',
+    payoutStatusLabel: 'Released',
+    payoutStatusClass: 'bg-[#00BAB5] text-white',
+    checkInInstructionsNote: 'No check-in instructions added',
+    paymentHistory: [
+      {
+        title: 'Upfront Payment',
+        subtitle: 'Card Payment · 1 Apr 2024',
+        amount: '£8,856',
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#00BAB5] text-white',
+      },
+    ],
+  },
+  'BK-2024-0887': {
+    reference: 'BK-2024-0887',
+    subtitle: 'Northern Housing · Sarah Mitchell · London Bridge Apartments',
+    headerStatusLabel: 'Confirmed',
+    headerStatusClass: 'rounded-full bg-[#00BAB5] text-white',
+    clientName: 'Sarah Mitchell',
+    clientPhone: '+44 7700 900456',
+    clientEmail: 's.mitchell@northernhousing.org.uk',
+    partnerName: 'City Living Ltd',
+    partnerContactName: 'Mark Thompson',
+    partnerEmail: 'mark@cityliving.co.uk',
+    property: 'London Bridge Apartments',
+    checkIn: '10 Apr 2024',
+    checkOut: '10 Jul 2024',
+    nights: 92,
+    guests: 2,
+    totalExcVat: '£7,956',
+    paymentStatusLabel: 'Paid',
+    paymentStatusClass: 'bg-[#00BAB5] text-white',
+    payoutStatusLabel: 'Scheduled',
+    payoutStatusClass: 'bg-[#E9EAEB] text-[#4B4E53]',
+    checkInInstructionsNote: 'No check-in instructions added',
+    paymentHistory: [
+      {
+        title: 'Upfront Payment',
+        subtitle: 'Card Payment · 10 Apr 2024',
+        amount: '£7,956',
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#00BAB5] text-white',
+      },
+    ],
+  },
   'BK-2024-0865': {
     reference: 'BK-2024-0865',
     subtitle: 'Leeds City Partners · Emma Watson · Park Lane Residences',
@@ -63,31 +131,70 @@ const DETAIL_BY_REFERENCE: Record<string, AdminBookingDetailContent> = {
     totalExcVat: '£9,504',
     paymentStatusLabel: 'Pending',
     paymentStatusClass: 'bg-[#E8A23E] text-white',
-    payoutStatusLabel: 'Held',
+    payoutStatusLabel: 'On Hold',
+    payoutStatusClass: 'bg-[#FFEFD6] text-[#B54708]',
+    checkInInstructionsNote: 'No check-in instructions added',
+    paymentHistory: [
+      {
+        title: 'Period 1 — 15 Mar 2024 to 11 Apr 2024',
+        subtitle: 'Card Payment · 15 Mar 2024',
+        amount: '£9,504',
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#00BAB5] text-white',
+      },
+      {
+        title: 'Period 2 — 12 Apr 2024 to 15 Apr 2024',
+        subtitle: 'Card Payment · Due 8 Apr 2024',
+        amount: '£1,092',
+        statusLabel: 'Scheduled',
+        statusClass: 'bg-[#0B1D37] text-white',
+      },
+    ],
+  },
+  'BK-2024-0878': {
+    reference: 'BK-2024-0878',
+    subtitle: 'Midlands Corp · Tom Richards · Canal View Suites',
+    headerStatusLabel: 'Awaiting Payment',
+    headerStatusClass: 'rounded-full bg-[#FDB022] text-white',
+    clientName: 'Tom Richards',
+    clientPhone: '+44 7700 900789',
+    clientEmail: 't.richards@midlands.com',
+    partnerName: 'Urban Stay Group',
+    partnerContactName: 'James Wilson',
+    partnerEmail: 'james@urbanstay.com',
+    property: 'Canal View Suites',
+    checkIn: '20 Mar 2024',
+    checkOut: '20 Jun 2024',
+    nights: 92,
+    guests: 2,
+    totalExcVat: '£10,260',
+    paymentStatusLabel: 'Overdue',
+    paymentStatusClass: 'bg-[#F04438] text-white',
+    payoutStatusLabel: 'On Hold',
     payoutStatusClass: 'bg-[#FFEFD6] text-[#B54708]',
     checkInInstructionsNote: 'No check-in instructions added',
     paymentHistory: [
       {
         title: 'Upfront Payment',
-        subtitle: 'Card Payment · 1 Feb 2024',
-        amount: '£7,200',
-        statusLabel: 'Paid',
-        statusClass: 'bg-[#00BAB5] text-white',
+        subtitle: 'Bank Transfer · 20 Mar 2024',
+        amount: '£10,260',
+        statusLabel: 'Overdue',
+        statusClass: 'bg-[#F04438] text-white',
       },
     ],
   },
   'BK-2024-0830': {
     reference: 'BK-2024-0830',
-    subtitle: 'Northern Housing · Anna Williams · Station House',
+    subtitle: 'Midlands Corp · Tom Richards · Battersea Rise House',
     headerStatusLabel: 'Completed',
     headerStatusClass: 'rounded-md bg-[#E9EAEB] text-[#4B4E53]',
-    clientName: 'Anna Williams',
-    clientPhone: '+44 7700 900456',
-    clientEmail: 'a.williams@northernhousing.org.uk',
-    partnerName: 'Haven Properties',
-    partnerContactName: 'Sarah Blake',
-    partnerEmail: 's.blake@havenproperties.com',
-    property: 'Station House',
+    clientName: 'Tom Richards',
+    clientPhone: '+44 7700 900789',
+    clientEmail: 't.richards@midlands.com',
+    partnerName: 'City Living Ltd',
+    partnerContactName: 'Mark Thompson',
+    partnerEmail: 'mark@cityliving.co.uk',
+    property: 'Battersea Rise House',
     checkIn: '1 Feb 2024',
     checkOut: '1 Mar 2024',
     nights: 29,
@@ -105,6 +212,70 @@ const DETAIL_BY_REFERENCE: Record<string, AdminBookingDetailContent> = {
         amount: '£7,200',
         statusLabel: 'Paid',
         statusClass: 'bg-[#00BAB5] text-white',
+      },
+    ],
+  },
+  'BK-2024-0756': {
+    reference: 'BK-2024-0756',
+    subtitle: 'Capital Relocations · David Brown · Victoria Apartments',
+    headerStatusLabel: 'Completed',
+    headerStatusClass: 'rounded-md bg-[#E9EAEB] text-[#4B4E53]',
+    clientName: 'David Brown',
+    clientPhone: '+44 7700 901842',
+    clientEmail: 'david.brown@example.com',
+    partnerName: 'City Living Ltd',
+    partnerContactName: 'Mark Thompson',
+    partnerEmail: 'mark@cityliving.co.uk',
+    property: 'Victoria Apartments',
+    checkIn: '1 Jan 2024',
+    checkOut: '28 Feb 2024',
+    nights: 59,
+    guests: 2,
+    totalExcVat: '£11,340',
+    paymentStatusLabel: 'Paid',
+    paymentStatusClass: 'bg-[#00BAB5] text-white',
+    payoutStatusLabel: 'Released',
+    payoutStatusClass: 'bg-[#00BAB5] text-white',
+    checkInInstructionsNote: 'No check-in instructions added',
+    paymentHistory: [
+      {
+        title: 'Upfront Payment',
+        subtitle: 'Card Payment · 1 Jan 2024',
+        amount: '£11,340',
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#00BAB5] text-white',
+      },
+    ],
+  },
+  'BK-2024-0842': {
+    reference: 'BK-2024-0842',
+    subtitle: 'Capital Relocations · David Brown · Riverside Quarter',
+    headerStatusLabel: 'Checked In',
+    headerStatusClass: 'rounded-full bg-[#0B1D37] text-white',
+    clientName: 'David Brown',
+    clientPhone: '+44 7700 901842',
+    clientEmail: 'david.brown@example.com',
+    partnerName: 'Aspire Apartments',
+    partnerContactName: 'Sophie Turner',
+    partnerEmail: 'sophie.turner@aspireapartments.co.uk',
+    property: 'Riverside Quarter',
+    checkIn: '1 Mar 2024',
+    checkOut: '31 May 2024',
+    nights: 91,
+    guests: 2,
+    totalExcVat: '£11,340',
+    paymentStatusLabel: 'Paid',
+    paymentStatusClass: 'bg-[#E6FAF9] text-[#00BAB5]',
+    payoutStatusLabel: 'On Hold',
+    payoutStatusClass: 'bg-[#FFEFD6] text-[#B54708]',
+    checkInInstructionsNote: 'No check-in instructions added',
+    paymentHistory: [
+      {
+        title: 'Upfront Payment',
+        subtitle: 'Card Payment · 1 Mar 2024',
+        amount: '£11,340',
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#E6FAF9] text-[#00BAB5]',
       },
     ],
   },
@@ -195,7 +366,7 @@ function paymentPayoutForStatus(status: AdminBookingDetailRowSource['status']): 
       return {
         paymentStatusLabel: 'Pending',
         paymentStatusClass: 'bg-[#E8A23E] text-white',
-        payoutStatusLabel: 'Held',
+        payoutStatusLabel: 'On Hold',
         payoutStatusClass: 'bg-[#FFEFD6] text-[#B54708]',
       };
     case 'confirmed':
@@ -223,10 +394,54 @@ function paymentPayoutForStatus(status: AdminBookingDetailRowSource['status']): 
   }
 }
 
+/** Demo 28-day + tail schedule for awaiting-payment rows (Phase 2-style schedule UI). */
+function paymentHistoryAwaitingSchedule(row: AdminBookingDetailRowSource): AdminBookingPaymentHistoryItem[] {
+  const period2DemoAmount = '£1,092';
+  const start = parseUkDate(row.checkIn);
+  if (!start) {
+    return [
+      {
+        title: 'Period 1 — Payment schedule',
+        subtitle: `Card Payment · ${row.checkIn}`,
+        amount: row.totalAmount,
+        statusLabel: 'Paid',
+        statusClass: 'bg-[#00BAB5] text-white',
+      },
+      {
+        title: 'Period 2 — Payment schedule',
+        subtitle: 'Card Payment · Due',
+        amount: period2DemoAmount,
+        statusLabel: 'Scheduled',
+        statusClass: 'bg-[#0B1D37] text-white',
+      },
+    ];
+  }
+  const period1End = addDaysUtc(start, 27);
+  const period2Start = addDaysUtc(start, 28);
+  const period2End = addDaysUtc(start, 31);
+  const period2Due = addDaysUtc(period2Start, -4);
+  return [
+    {
+      title: `Period 1 — ${formatUkDate(start)} to ${formatUkDate(period1End)}`,
+      subtitle: `Card Payment · ${row.checkIn}`,
+      amount: row.totalAmount,
+      statusLabel: 'Paid',
+      statusClass: 'bg-[#00BAB5] text-white',
+    },
+    {
+      title: `Period 2 — ${formatUkDate(period2Start)} to ${formatUkDate(period2End)}`,
+      subtitle: `Card Payment · Due ${formatUkDate(period2Due)}`,
+      amount: period2DemoAmount,
+      statusLabel: 'Scheduled',
+      statusClass: 'bg-[#0B1D37] text-white',
+    },
+  ];
+}
+
 function paymentHistoryForRow(row: AdminBookingDetailRowSource): AdminBookingPaymentHistoryItem[] {
   switch (row.status) {
     case 'awaiting-payment':
-      return [];
+      return paymentHistoryAwaitingSchedule(row);
     case 'cancelled':
       return [
         {
@@ -304,6 +519,11 @@ const cardShell =
 const labelClass =
   'font-avenir-regular mb-2 text-[11px] font-semibold uppercase leading-4 tracking-[0.06em] text-[#717680]';
 
+/** Extension card stat row — tight label/value stack (no `mb-2` from `labelClass`). */
+const extensionStatLabelClass =
+  'font-avenir-regular mb-0.5 text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-[#717680]';
+const extensionStatValueClass = 'font-avenir-regular text-sm font-semibold leading-5 text-[#0B1D37]';
+
 function InfoCard({
   label,
   children,
@@ -328,9 +548,59 @@ export type AdminPortalBookingDetailViewProps = {
 };
 
 const AWAITING_PAYMENT_HEADER_LABEL = 'Awaiting Payment' as const;
+const CONFIRMED_HEADER_LABEL = 'Confirmed' as const;
+const CHECKED_IN_HEADER_LABEL = 'Checked In' as const;
 
 export function AdminPortalBookingDetailView({ detail, onBack, className }: AdminPortalBookingDetailViewProps) {
-  const showStripePaymentVerificationBanner = detail.headerStatusLabel === AWAITING_PAYMENT_HEADER_LABEL;
+  const showStripePaymentVerificationBanner =
+    detail.headerStatusLabel === AWAITING_PAYMENT_HEADER_LABEL && detail.paymentStatusLabel !== 'Overdue';
+  const showExtensionRequestPendingCard = detail.headerStatusLabel === CONFIRMED_HEADER_LABEL;
+  const isPaymentHistoryInCard =
+    detail.headerStatusLabel === CONFIRMED_HEADER_LABEL ||
+    detail.headerStatusLabel === AWAITING_PAYMENT_HEADER_LABEL;
+  const showCheckedInPayoutHoldCta =
+    detail.headerStatusLabel === CHECKED_IN_HEADER_LABEL && detail.payoutStatusLabel === 'On Hold';
+
+  const paymentHistoryList =
+    detail.paymentHistory.length === 0 ? (
+      <p
+        className={cn(
+          'font-avenir-regular text-center text-sm text-[#717680]',
+          isPaymentHistoryInCard ? 'py-6' : 'px-5 py-8',
+        )}
+      >
+        No payments recorded yet.
+      </p>
+    ) : (
+      <ul className="divide-y divide-[#e9eaeb]">
+        {detail.paymentHistory.map((item, index) => (
+          <li
+            key={`${item.title}-${index}`}
+            className={cn(
+              'flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4',
+              isPaymentHistoryInCard ? 'px-0' : 'px-5',
+            )}
+          >
+            <div className="min-w-0">
+              <p className="font-avenir-regular text-sm font-semibold text-[#0B1D37]">{item.title}</p>
+              <p className="font-avenir-regular mt-1 text-xs leading-4 text-[#717680]">{item.subtitle}</p>
+            </div>
+            <div className="flex shrink-0 flex-row flex-wrap items-center gap-3 sm:justify-end">
+              <p className="font-avenir-regular text-sm font-semibold text-[#0B1D37]">{item.amount}</p>
+              <span
+                className={cn(
+                  'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold leading-[18px]',
+                  item.statusClass,
+                )}
+              >
+                {item.statusLabel}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+
   return (
     <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-0 sm:px-8 lg:px-10', className)}>
       <div className="mb-8 flex flex-col gap-6">
@@ -415,55 +685,74 @@ export function AdminPortalBookingDetailView({ detail, onBack, className }: Admi
       </div>
 
       <section className="mt-10" aria-labelledby="admin-booking-checkin-heading">
-        <h2 id="admin-booking-checkin-heading" className={PORTAL_DASHBOARD_SECTION_HEADING_CLASS}>
-          Check-in instructions
-        </h2>
-        <div className={cn(cardShell)}>
-          {showStripePaymentVerificationBanner ? (
-            <div
-              role="status"
-              aria-live="polite"
-              className={cn(
-                'mb-5 w-full border border-solid border-[#FEF3C7] bg-[#FFFBEB] p-4 sm:p-5',
-                bhRounded('xl'),
-              )}
-            >
-              <div className="flex gap-3">
-                <AlertTriangle
-                  className="mt-0.5 size-5 shrink-0 text-[#F79009]"
-                  strokeWidth={2}
-                  aria-hidden
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="font-avenir-regular text-sm font-semibold leading-5 text-[#0B1D37] sm:text-base sm:leading-6">
-                    Payment Pending – Verification Required
-                  </p>
-                  <p className="font-avenir-regular mt-2 text-sm leading-5 text-[#4B4E53]">
-                    Stripe Payment Intent{' '}
-                    <span className="break-all font-mono text-[13px] text-[#0B1D37]">pi_30xx8865xxxxxxxxA</span> is in a
-                    pending state. Verify status with Stripe to auto-confirm.
-                  </p>
-                  <BookingHubPrimaryButton
-                    type="button"
-                    size="sm"
-                    className="mt-4"
-                    iconLeading={<ShieldCheck className="size-4" strokeWidth={2} aria-hidden />}
-                  >
-                    Verify Stripe Payment
-                  </BookingHubPrimaryButton>
-                </div>
-              </div>
+        {showCheckedInPayoutHoldCta ? (
+          <div className={cn(cardShell)}>
+            <h2 id="admin-booking-checkin-heading" className={cn(labelClass, 'mb-4')}>
+              Check-in instructions
+            </h2>
+            <div className="flex flex-row flex-wrap items-center gap-x-3 gap-y-1">
+              <p className="font-avenir-regular text-sm font-medium leading-5 text-[#E8A23E]">
+                {detail.checkInInstructionsNote}
+              </p>
+              <button
+                type="button"
+                className="font-avenir-regular inline-flex items-center gap-0.5 text-sm font-semibold text-[#00BAB5] transition-colors hover:text-[#008884]"
+              >
+                Chase Partner
+                <ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+              </button>
             </div>
-          ) : null}
-          <button
-            type="button"
-            className="font-avenir-regular inline-flex items-center gap-0.5 text-sm font-semibold text-[#00BAB5] transition-colors hover:text-[#008884]"
-          >
-            Chase Partner
-            <ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />
-          </button>
-          <p className="font-avenir-regular mt-3 text-sm font-medium text-[#E8A23E]">{detail.checkInInstructionsNote}</p>
-        </div>
+          </div>
+        ) : (
+          <>
+            <h2 id="admin-booking-checkin-heading" className={PORTAL_DASHBOARD_SECTION_HEADING_CLASS}>
+              Check-in instructions
+            </h2>
+            <div className={cn(cardShell)}>
+              {showStripePaymentVerificationBanner ? (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="mb-5 w-full rounded-xl border border-solid border-[#FEF3C7] bg-[#FFFBEB] p-4 sm:p-5"
+                >
+                  <div className="flex gap-3">
+                    <AlertTriangle
+                      className="mt-0.5 size-5 shrink-0 text-[#F79009]"
+                      strokeWidth={2}
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-avenir-regular text-sm font-semibold leading-5 text-[#0B1D37]">
+                        Payment Pending – Verification Required
+                      </p>
+                      <p className="font-avenir-regular mt-2 text-sm leading-5 text-[#4B4E53]">
+                        Stripe Payment Intent{' '}
+                        <span className="break-all font-mono text-sm text-[#0B1D37]">pi_30xx8865xxxxxxxxA</span> is in a
+                        pending state. Verify status with Stripe to auto-confirm.
+                      </p>
+                      <BookingHubPrimaryButton
+                        type="button"
+                        size="sm"
+                        className="mt-4"
+                        iconLeading={<ShieldCheck className="size-4" strokeWidth={2} aria-hidden />}
+                      >
+                        Verify Stripe Payment
+                      </BookingHubPrimaryButton>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                className="font-avenir-regular inline-flex items-center gap-0.5 text-sm font-semibold text-[#00BAB5] transition-colors hover:text-[#008884]"
+              >
+                Chase Partner
+                <ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+              </button>
+              <p className="font-avenir-regular mt-3 text-sm font-medium text-[#E8A23E]">{detail.checkInInstructionsNote}</p>
+            </div>
+          </>
+        )}
       </section>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -475,8 +764,18 @@ export function AdminPortalBookingDetailView({ detail, onBack, className }: Admi
           size="sm"
           iconLeading={<FileText className="size-4" strokeWidth={2} aria-hidden />}
         >
-          View Amendment History
+          {showCheckedInPayoutHoldCta ? 'Hide Amendment History' : 'View Amendment History'}
         </BookingHubSecondaryButton>
+        {showCheckedInPayoutHoldCta ? (
+          <BookingHubPrimaryButton
+            type="button"
+            size="sm"
+            iconLeading={<Play className="size-4" strokeWidth={2} aria-hidden />}
+            iconTrailing={<ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />}
+          >
+            Release Payout Hold
+          </BookingHubPrimaryButton>
+        ) : null}
         <button
           type="button"
           className="font-avenir-regular rounded-lg px-3 py-2 text-sm font-semibold text-[#F04438] transition-colors hover:text-[#D92D20]"
@@ -484,6 +783,58 @@ export function AdminPortalBookingDetailView({ detail, onBack, className }: Admi
           Cancel Booking
         </button>
       </div>
+
+      {showExtensionRequestPendingCard ? (
+        <section className="mt-12" aria-labelledby="admin-booking-extension-heading">
+          <div className={cn(cardShell)}>
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <div
+                className={cn(
+                  'flex size-9 shrink-0 items-center justify-center bg-[#00BAB5] text-white sm:size-10',
+                  bhRounded('full'),
+                )}
+                aria-hidden
+              >
+                <Check className="size-4 sm:size-[18px]" strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2
+                  id="admin-booking-extension-heading"
+                  className="font-avenir-regular text-[11px] font-semibold uppercase leading-tight tracking-[0.06em] text-[#0B1D37]"
+                >
+                  Extension request – pending approval
+                </h2>
+                <p className="font-avenir-regular mt-1.5 text-sm leading-[1.45] text-[#4B4E53]">
+                  Client has requested +14 nights. Partner availability confirmed at the original rate. A new pricing
+                  snapshot will be frozen on approval and Period 2 payment triggered.
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-3 sm:gap-y-0">
+                  <div>
+                    <p className={extensionStatLabelClass}>New check-out</p>
+                    <p className={extensionStatValueClass}>29 Jul 2024</p>
+                  </div>
+                  <div>
+                    <p className={extensionStatLabelClass}>Additional value (exc VAT)</p>
+                    <p className={extensionStatValueClass}>£952</p>
+                  </div>
+                  <div className="min-w-0 sm:col-span-1">
+                    <p className={extensionStatLabelClass}>Pricing snapshot</p>
+                    <p className={extensionStatValueClass}>Original rate locked (£68/night)</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <BookingHubPrimaryButton type="button" size="sm">
+                    Approve extension
+                  </BookingHubPrimaryButton>
+                  <BookingHubTertiaryButton type="button" size="sm">
+                    Reject
+                  </BookingHubTertiaryButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="mt-12" aria-labelledby="admin-booking-documents-heading">
         <h2 id="admin-booking-documents-heading" className="font-avenir-regular text-base font-semibold leading-6 text-[#0B1D37]">
@@ -543,39 +894,23 @@ export function AdminPortalBookingDetailView({ detail, onBack, className }: Admi
       </section>
 
       <section className="mt-12" aria-labelledby="admin-booking-payment-history-heading">
-        <h2 id="admin-booking-payment-history-heading" className={PORTAL_DASHBOARD_SECTION_HEADING_CLASS}>
-          Payment history
-        </h2>
-        <div className="overflow-hidden rounded-xl border border-solid border-[#e9eaeb] bg-white shadow-[0_1px_2px_rgba(11,29,55,0.06)]">
-          {detail.paymentHistory.length === 0 ? (
-            <p className="font-avenir-regular px-5 py-8 text-center text-sm text-[#717680]">No payments recorded yet.</p>
-          ) : (
-            <ul className="divide-y divide-[#e9eaeb]">
-              {detail.paymentHistory.map((item, index) => (
-                <li
-                  key={`${item.title}-${index}`}
-                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-                >
-                  <div className="min-w-0">
-                    <p className="font-avenir-regular text-sm font-semibold text-[#0B1D37]">{item.title}</p>
-                    <p className="font-avenir-regular mt-1 text-xs leading-4 text-[#717680]">{item.subtitle}</p>
-                  </div>
-                  <div className="flex shrink-0 flex-row flex-wrap items-center gap-3 sm:justify-end">
-                    <p className="font-avenir-regular text-sm font-semibold text-[#0B1D37]">{item.amount}</p>
-                    <span
-                      className={cn(
-                        'inline-flex rounded-full px-2.5 py-1 text-xs font-semibold leading-[18px]',
-                        item.statusClass,
-                      )}
-                    >
-                      {item.statusLabel}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {isPaymentHistoryInCard ? (
+          <div className={cn(cardShell)}>
+            <h2 id="admin-booking-payment-history-heading" className={cn(labelClass, 'mb-4')}>
+              Payment history
+            </h2>
+            {paymentHistoryList}
+          </div>
+        ) : (
+          <>
+            <h2 id="admin-booking-payment-history-heading" className={PORTAL_DASHBOARD_SECTION_HEADING_CLASS}>
+              Payment history
+            </h2>
+            <div className="overflow-hidden rounded-xl border border-solid border-[#e9eaeb] bg-white shadow-[0_1px_2px_rgba(11,29,55,0.06)]">
+              {paymentHistoryList}
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

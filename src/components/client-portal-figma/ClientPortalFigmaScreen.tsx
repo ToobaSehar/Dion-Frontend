@@ -16,6 +16,7 @@ function hubMainViewFromSearchParams(searchParams: ReturnType<typeof useSearchPa
   const tab = searchParams.get(CLIENT_PORTAL_HUB_VIEW_QUERY_KEY);
   if (tab === 'my-requests') return 'my-requests';
   if (tab === 'my-bookings') return 'my-bookings';
+  if (tab === 'payments') return 'payments';
   return 'dashboard';
 }
 
@@ -37,6 +38,12 @@ function ClientPortalFigmaScreenInner({ className }: { className?: string }) {
     if (tab === 'my-bookings') {
       setMainView('my-bookings');
       router.replace('/client', { scroll: false });
+      return;
+    }
+    if (tab === 'payments') {
+      setMainView('payments');
+      router.replace('/client', { scroll: false });
+      return;
     }
   }, [router, searchParams]);
 

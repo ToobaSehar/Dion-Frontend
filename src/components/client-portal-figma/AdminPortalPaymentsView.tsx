@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 
 import {
   AdminPortalPaymentsStatusPills,
@@ -188,17 +188,9 @@ const paymentsTableCompactBtnClass = cn(
 
 function PaymentRowActionsBar({
   status,
-  isConfirmReceiptOpen = false,
-  onOpenConfirmReceipt = () => {},
-  onCancelConfirmReceipt = () => {},
-  onFinalConfirmReceipt = () => {},
   onViewPayment,
 }: {
   status: AdminPortalPaymentRowStatus;
-  isConfirmReceiptOpen?: boolean;
-  onOpenConfirmReceipt?: () => void;
-  onCancelConfirmReceipt?: () => void;
-  onFinalConfirmReceipt?: () => void;
   onViewPayment?: () => void;
 }) {
   const hasView = Boolean(onViewPayment);
@@ -220,43 +212,6 @@ function PaymentRowActionsBar({
   );
 
   if (status === 'overdue') {
-    if (isConfirmReceiptOpen) {
-      return (
-        <div className="flex w-full min-w-0 items-start justify-between gap-4">
-          <div className="min-w-0 flex-1" role="region" aria-label="Confirm receipt">
-            <div className="flex gap-2">
-              <AlertTriangle
-                className="mt-0.5 size-5 shrink-0 text-[#F79009]"
-                strokeWidth={2}
-                aria-hidden
-              />
-              <p className="font-avenir-regular text-sm leading-5 text-[#0B1D37]">
-                Confirm payment received? This will mark the payment as paid and trigger booking confirmation.
-              </p>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <BookingHubPrimaryButton
-                type="button"
-                size="sm"
-                className={paymentsTableCompactBtnClass}
-                onClick={onFinalConfirmReceipt}
-              >
-                Confirm Receipt
-              </BookingHubPrimaryButton>
-              <button
-                type="button"
-                onClick={onCancelConfirmReceipt}
-                className="font-avenir-regular text-sm font-semibold text-[#717680] transition-colors hover:text-[#0B1D37]"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-          {viewBtn}
-        </div>
-      );
-    }
-
     return (
       <div className="flex w-full min-w-0 items-center justify-between gap-3">
         <div className="flex min-w-0 flex-nowrap items-center gap-2">
@@ -273,7 +228,6 @@ function PaymentRowActionsBar({
             size="sm"
             className={paymentsTableCompactBtnClass}
             iconTrailing={<ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />}
-            onClick={onOpenConfirmReceipt}
           >
             Confirm Receipt
           </BookingHubPrimaryButton>
@@ -330,11 +284,6 @@ export function AdminPortalPaymentsView({
   const isControlled = controlledFilter !== undefined && onStatusFilterChange !== undefined;
   const filter = isControlled ? controlledFilter : internalFilter;
   const setFilter = isControlled ? onStatusFilterChange : setInternalFilter;
-  const [confirmReceiptRowId, setConfirmReceiptRowId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setConfirmReceiptRowId(null);
-  }, [filter]);
 
   const visible = useMemo(() => rows.filter((r) => rowMatchesFilter(r, filter)), [rows, filter]);
 
@@ -397,10 +346,6 @@ export function AdminPortalPaymentsView({
                     <td className={cn(tdClass, 'min-w-0 pr-6')} colSpan={2}>
                       <PaymentRowActionsBar
                         status={row.status}
-                        isConfirmReceiptOpen={confirmReceiptRowId === row.id}
-                        onOpenConfirmReceipt={() => setConfirmReceiptRowId(row.id)}
-                        onCancelConfirmReceipt={() => setConfirmReceiptRowId(null)}
-                        onFinalConfirmReceipt={() => setConfirmReceiptRowId(null)}
                         onViewPayment={onViewPayment ? () => onViewPayment(row) : undefined}
                       />
                     </td>

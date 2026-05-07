@@ -51,6 +51,11 @@ export type BookingHubInputFieldProps = {
    * When set, no native `<input>` / `<textarea>` is rendered; focus chrome uses `focus-within` on the shell.
    */
   control?: React.ReactNode;
+  /**
+   * When using `control` with a dropdown/popover that extends past the shell, set true so the shell is not
+   * `overflow-hidden` (default clips for Figma single-line fields).
+   */
+  controlPopover?: boolean;
   /** Reserved for parity with Figma destructive column; combined with `error` for full error chrome. */
   variant?: BookingHubInputFieldVariant;
   size?: BookingHubInputFieldSize;
@@ -79,6 +84,7 @@ export const BookingHubInputField = forwardRef<HTMLInputElement | HTMLTextAreaEl
       suffix,
       icon,
       control,
+      controlPopover = false,
       variant = 'default',
       size = 'md',
       className,
@@ -112,8 +118,8 @@ export const BookingHubInputField = forwardRef<HTMLInputElement | HTMLTextAreaEl
       'box-border flex w-full flex-row justify-start gap-1 rounded-[8px] transition-[border-color,box-shadow,background-color] lg:gap-1.5',
       /** `stretch` so every control (email, password, suffix) shares the same row height as responsive `min-h` (password/text intrinsic heights differ under forms UA). */
       multiline && !useControl ? 'items-start' : 'items-stretch',
-      /* Figma “Clip content” on single-line / control shells only — not on multiline textarea */
-      (useControl || !multiline) && 'overflow-hidden',
+      /* Figma “Clip content” on single-line / control shells — omit when control hosts a popover */
+      (useControl || !multiline) && !(useControl && controlPopover) && 'overflow-hidden',
       pad,
       shellMinH,
       disabled &&
@@ -186,7 +192,7 @@ export const BookingHubInputField = forwardRef<HTMLInputElement | HTMLTextAreaEl
               <span className={cn('flex shrink-0 items-center self-stretch', BH_INPUT_FIELD_PREFIX)}>{prefix}</span>
             ) : null}
             {useControl ? (
-              <div className="flex min-h-0 min-w-0 flex-1 items-center self-stretch">{control}</div>
+              <div className="flex min-h-0 min-w-0 w-full flex-1 items-stretch self-stretch">{control}</div>
             ) : multiline ? (
               <textarea
                 ref={ref as React.Ref<HTMLTextAreaElement>}

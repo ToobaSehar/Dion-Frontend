@@ -397,6 +397,7 @@ export const BookingHubPhoneField = forwardRef<HTMLInputElement, BookingHubPhone
                   'text-left transition-colors',
                   'hover:bg-[#fafafa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-booking-teal focus-visible:ring-offset-0',
                   'disabled:cursor-not-allowed disabled:opacity-50',
+                  '-ml-3 pl-3 md:-ml-[14px] md:pl-[14px] lg:-ml-4 lg:pl-4 xl:-ml-[18px] xl:pl-[18px]',
                   triggerTypo,
                   'pr-1',
                 )}

@@ -22,3 +22,5 @@ export const CLIENT_PORTAL_HUB_VIEW_QUERY_KEY = 'view' as const;
 export const CLIENT_PORTAL_HUB_MY_REQUESTS_HREF = '/client?view=my-requests' as const;
 
 export const CLIENT_PORTAL_HUB_MY_BOOKINGS_HREF = '/client?view=my-bookings' as const;
+
+export const CLIENT_PORTAL_HUB_PAYMENTS_HREF = '/client?view=payments' as const;

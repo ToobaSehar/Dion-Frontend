@@ -44,27 +44,38 @@ const MOCK_ROWS: AdminPortalBookingTableRow[] = [
     totalAmount: '£9,504',
     status: 'awaiting-payment',
   },
-  /** Dummy partner-cancellation scenario — visible when filtering Cancelled from dashboard Action required. */
   {
-    id: 'partner-cancellation-demo',
-    reference: 'BK-2026-0142',
-    bookingGroup: 'BG-2026-0099',
-    client: 'Michael Foster',
+    id: 'partner-bk-0891',
+    reference: 'BK-2024-0891',
+    bookingGroup: null,
+    client: 'James Davies',
     company: 'Acme Council',
-    partner: 'Haven Properties',
-    property: 'Quayside Loft – Bristol',
-    checkIn: '18 Apr 2026',
-    totalAmount: '£2,450',
-    status: 'cancelled',
+    partner: 'City Living Ltd',
+    property: 'Victoria Apartments',
+    checkIn: '1 Apr 2024',
+    totalAmount: '£8,856',
+    status: 'checked-in',
+  },
+  {
+    id: 'partner-bk-0887',
+    reference: 'BK-2024-0887',
+    bookingGroup: null,
+    client: 'Sarah Mitchell',
+    company: 'Northern Housing',
+    partner: 'City Living Ltd',
+    property: 'London Bridge Apartments',
+    checkIn: '10 Apr 2024',
+    totalAmount: '£7,956',
+    status: 'confirmed',
   },
   {
     id: '1',
     reference: 'BK-2024-0830',
     bookingGroup: 'BG-2024-0041',
-    client: 'Anna Williams',
-    company: 'Northern Housing',
-    partner: 'Haven Properties',
-    property: 'Station House',
+    client: 'Tom Richards',
+    company: 'Midlands Corp',
+    partner: 'City Living Ltd',
+    property: 'Battersea Rise House',
     checkIn: '1 Feb 2024',
     totalAmount: '£7,200',
     status: 'completed',
@@ -83,14 +94,14 @@ const MOCK_ROWS: AdminPortalBookingTableRow[] = [
   },
   {
     id: '3',
-    reference: 'BK-2024-0821',
+    reference: 'BK-2024-0878',
     bookingGroup: 'BG-2024-0038',
-    client: 'Sarah Mitchell',
-    company: 'BuildCo Ltd',
-    partner: 'Haven Properties',
-    property: 'Riverside Court',
-    checkIn: '22 Mar 2024',
-    totalAmount: '£5,320',
+    client: 'Tom Richards',
+    company: 'Midlands Corp',
+    partner: 'Urban Stay Group',
+    property: 'Canal View Suites',
+    checkIn: '20 Mar 2024',
+    totalAmount: '£10,260',
     status: 'awaiting-payment',
   },
   {
@@ -103,7 +114,7 @@ const MOCK_ROWS: AdminPortalBookingTableRow[] = [
     property: 'Harbour Studios',
     checkIn: '10 Jan 2024',
     totalAmount: '£4,200',
-    status: 'completed',
+    status: 'checked-in',
   },
   {
     id: '5',
@@ -116,6 +127,18 @@ const MOCK_ROWS: AdminPortalBookingTableRow[] = [
     checkIn: '1 Mar 2024',
     totalAmount: '£11,340',
     status: 'checked-in',
+  },
+  {
+    id: 'partner-bk-0756',
+    reference: 'BK-2024-0756',
+    bookingGroup: null,
+    client: 'David Brown',
+    company: 'Capital Relocations',
+    partner: 'City Living Ltd',
+    property: 'Victoria Apartments',
+    checkIn: '1 Jan 2024',
+    totalAmount: '£11,340',
+    status: 'completed',
   },
   {
     id: '6',
@@ -159,6 +182,10 @@ function statusLabel(status: AdminPortalBookingRowStatus): string {
     case 'cancelled':
       return 'Cancelled';
   }
+}
+
+export function getAdminPortalBookingMockRowById(id: string): AdminPortalBookingTableRow | undefined {
+  return MOCK_ROWS.find((row) => row.id === id);
 }
 
 function rowMatchesFilter(row: AdminPortalBookingTableRow, tab: AdminPortalBookingsFilterTab): boolean {

@@ -5,6 +5,8 @@
 export const ADMIN_PORTAL_REQUEST_STATIC_PARAM_IDS = [
   /** Rich demo row (`DETAIL_BY_REFERENCE`); URL uses dummy id `99`, not a real booking id. */
   '99',
+  /** Acme Council client-detail Requests tab — `RQ-2024-0155`. */
+  '9',
   '1',
   '2',
   '3',

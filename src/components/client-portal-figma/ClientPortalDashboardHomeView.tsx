@@ -14,6 +14,10 @@ import {
 import Link from 'next/link';
 
 import { BookingHubPrimaryButton } from '@/components/booking-hub-button';
+import {
+  CLIENT_PORTAL_HUB_MY_BOOKINGS_HREF,
+  CLIENT_PORTAL_HUB_PAYMENTS_HREF,
+} from '@/components/client-portal-figma/clientPortalFigmaMainView';
 import { ClientPortalDashboardActiveRequestsSection } from '@/components/client-portal-figma/ClientPortalDashboardActiveRequestsSection';
 import {
   PortalDashboardActiveBookingsCard,
@@ -191,6 +195,7 @@ export function ClientPortalDashboardHomeView({
           title="Active Bookings"
           headerIcon={Calendar}
           items={portalDashboardDummyActiveBookingsItems}
+          footerHref={CLIENT_PORTAL_HUB_MY_BOOKINGS_HREF}
         />
 
         <section className={portalDashboardColumnCardClass} aria-labelledby="client-portal-due-soon-widget-heading">
@@ -220,9 +225,12 @@ export function ClientPortalDashboardHomeView({
             ))}
           </ul>
           <div className="flex justify-center border-t border-[#e9eaeb] py-5">
-            <button type="button" className="font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline">
+            <Link
+              href={CLIENT_PORTAL_HUB_PAYMENTS_HREF}
+              className="font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00BAB5] focus-visible:ring-offset-2"
+            >
               View all payments
-            </button>
+            </Link>
           </div>
         </section>
       </div>

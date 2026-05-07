@@ -1,7 +1,9 @@
 'use client';
 
 import { MapPin } from 'lucide-react';
+import Link from 'next/link';
 
+import { CLIENT_PORTAL_HUB_MY_REQUESTS_HREF } from '@/components/client-portal-figma/clientPortalFigmaMainView';
 import { cn } from '@/lib/utils';
 
 const columnCardClass =
@@ -89,9 +91,12 @@ export function ClientPortalDashboardActiveRequestsSection({
       </ul>
 
       <div className="flex justify-center border-t border-[#e9eaeb] py-5">
-        <button type="button" className="font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline">
+        <Link
+          href={CLIENT_PORTAL_HUB_MY_REQUESTS_HREF}
+          className="font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00BAB5] focus-visible:ring-offset-2"
+        >
           View all requests
-        </button>
+        </Link>
       </div>
     </section>
   );

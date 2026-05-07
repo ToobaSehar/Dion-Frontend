@@ -277,7 +277,7 @@ export type AdminPortalPaymentDetailViewProps = {
 
 export function AdminPortalPaymentDetailView({ detail, onBack, className }: AdminPortalPaymentDetailViewProps) {
   return (
-    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-0 sm:px-8 lg:px-10', className)}>
+    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-16 sm:pb-20 lg:pb-24 sm:px-8 lg:px-10', className)}>
       <div className="mb-8 flex flex-col gap-6">
         <button
           type="button"

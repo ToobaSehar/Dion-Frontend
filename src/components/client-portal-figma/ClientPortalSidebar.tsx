@@ -11,13 +11,13 @@ import {
   Building2,
   Calendar,
   CalendarCheck,
-  ClipboardList,
   CreditCard,
   FileText,
   Home,
   LayoutDashboard,
   MapPin,
   PoundSterling,
+  Receipt,
   Users,
 } from 'lucide-react';
 
@@ -85,6 +85,7 @@ const ADMIN_NAV_GROUPS: Array<{
     items: [
       { label: 'Payments', view: 'payments' },
       { label: 'Payouts', view: 'payouts' },
+      { label: 'Invoices', view: 'invoices' },
     ],
   },
   {
@@ -112,6 +113,8 @@ function adminShellNavIcon(view: AdminPortalFigmaMainView): ReactNode {
       return <CreditCard className={cls} strokeWidth={SIDEBAR_NAV_ICON_STROKE} aria-hidden />;
     case 'payouts':
       return <Banknote className={cls} strokeWidth={SIDEBAR_NAV_ICON_STROKE} aria-hidden />;
+    case 'invoices':
+      return <Receipt className={cls} strokeWidth={SIDEBAR_NAV_ICON_STROKE} aria-hidden />;
     case 'clients':
       return <Users className={cls} strokeWidth={SIDEBAR_NAV_ICON_STROKE} aria-hidden />;
     case 'partners':

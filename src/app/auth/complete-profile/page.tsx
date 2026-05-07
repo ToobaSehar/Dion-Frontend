@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -9,23 +9,37 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import { BH_GRID_SHELL_CLASSES } from '@/components/booking-hub-grid';
-import { BH_HUB_AUTH_CARD_WHITE } from '@/components/auth/bookingHubAuthCardShell';
-import { bhGap, bhMarginBottom, bhPadding, bhPaddingX, bhSpacing, bhSpaceY } from '@/components/booking-hub-space';
-import { bhRounded } from '@/components/booking-hub-radius';
-import { BookingHubPrimaryButton } from '@/components/booking-hub-button';
+import { BookingHubInputField } from '@/components/BookingHubInputField';
 import { BookingHubPhoneField } from '@/components/BookingHubPhoneField';
+import { BookingHubPrimaryButton } from '@/components/booking-hub-button';
+import { BH_AUTH_HUB_PRIMARY_STACK_WIDTH } from '@/components/auth/AuthHubSegmentedTabs';
+import {
+  BH_HUB_AUTH_CARD_WHITE,
+  BH_HUB_AUTH_FIELD_GRID_CLASSES,
+} from '@/components/auth/bookingHubAuthCardShell';
+import { BookingHubSignUpPageShell } from '@/components/auth/BookingHubSignUpPageShell';
+import { bhGap, bhMarginBottom, bhMarginTop, bhPadding, bhPaddingX, bhSpacing, bhSpaceY } from '@/components/booking-hub-space';
+import { bhRounded } from '@/components/booking-hub-radius';
 
-const schema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  companyName: z.string().min(2, 'Company name must be at least 2 characters'),
-  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
-  termsAccepted: z.boolean().refine((v) => v === true, {
-    message: 'You must accept the Terms & Conditions to continue.',
-  }),
-});
+type FormValues = {
+  fullName: string;
+  companyName: string;
+  phone: string;
+  termsAccepted: boolean;
+};
 
-type FormValues = z.infer<typeof schema>;
+function createCompleteProfileSchema(isPartner: boolean) {
+  return z.object({
+    fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+    companyName: z.string().min(2, 'Company name must be at least 2 characters'),
+    phone: z.string().min(10, 'Phone number must be at least 10 characters'),
+    termsAccepted: z.boolean().refine((v) => v === true, {
+      message: isPartner
+        ? 'You must agree to the partner terms and conditions'
+        : 'You must agree to the client terms and conditions',
+    }),
+  });
+}
 
 function CompleteProfileForm() {
   const searchParams = useSearchParams();
@@ -33,6 +47,8 @@ function CompleteProfileForm() {
   const nameParam = searchParams.get('name') || '';
   const emailParam = searchParams.get('email') || '';
   const returnTo = searchParams.get('return_to') || '';
+  /** Set when opening “Finish setting up” from sign-up Google/Microsoft (no auth session yet). */
+  const signupSsoPending = searchParams.get('signup_sso') === '1';
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,18 +56,21 @@ function CompleteProfileForm() {
 
   const isPartner = role === 'partner';
   const termsHref = isPartner ? '/partner-terms' : '/terms';
-  const termsLabel = isPartner ? 'partner terms and conditions' : 'client terms and conditions';
+  const termsLinkText = isPartner ? 'partner terms and conditions' : 'Booking Hub client terms and conditions';
+  const termsId = 'bh-complete-profile-termsAccepted';
+
+  const schema = useMemo(() => createCompleteProfileSchema(isPartner), [isPartner]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { fullName: nameParam, termsAccepted: false },
+    defaultValues: { fullName: nameParam, companyName: '', phone: '', termsAccepted: false },
   });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) window.location.href = '/';
+      if (!session && !signupSsoPending) window.location.href = '/';
     });
-  }, []);
+  }, [signupSsoPending]);
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
@@ -90,117 +109,207 @@ function CompleteProfileForm() {
     }
   };
 
-  return (
-    <div
-      className={cn(
-        'flex min-h-screen flex-col items-center justify-start bg-booking-bg py-10 sm:py-14',
-        BH_GRID_SHELL_CLASSES,
-      )}
-      style={{ fontFamily: 'Avenir, "Avenir LT Std", "Nunito Sans", system-ui, sans-serif' }}
-    >
-      <div className={bhMarginBottom('8')}>
-        <Image src="/blue-teal.webp" alt="Booking Hub" width={200} height={56} className="h-auto w-auto max-w-[180px] object-contain" priority />
+  const header = (
+    <header className="flex w-full flex-col items-center">
+      <div className={cn('flex justify-center', bhMarginBottom('3xl'), 'md:mb-8')}>
+        <Image
+          src="/blue-teal-icon%20(1).webp"
+          alt="Booking Hub"
+          width={56}
+          height={64}
+          className="h-14 w-auto object-contain sm:h-16 md:h-[4.5rem]"
+          priority
+        />
       </div>
-
-      <div className={cn(BH_HUB_AUTH_CARD_WHITE, 'max-w-lg')}>
-        <h1 className="bh-h1 mb-1 text-center">Complete Your Account</h1>
-        <p className="bh-lead mb-6 text-center text-booking-gray">
-          Just a few more details to set up your {isPartner ? 'partner' : 'client'} account.
-        </p>
-
-        {emailParam && (
-          <div
-            className={cn(
-              'mb-5 flex items-center border border-gray-200 bg-gray-50',
-              bhRounded('xl'),
-              bhSpacing(bhPaddingX('xl'), 'py-2.5'),
-              bhGap('2'),
-            )}
-          >
-            <svg className="w-4 h-4 text-booking-teal flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-            </svg>
-            <p className="bh-small text-booking-gray">Signing in as <span className="font-semibold text-booking-dark">{emailParam}</span></p>
-          </div>
+      <div
+        className={cn(
+          'mx-auto w-full max-w-bh-xl text-center',
+          bhPaddingX('xl'),
+          bhMarginTop('md'),
+          'md:mt-3',
+          bhGap('2'),
         )}
+      >
+        <h1 className={cn('bh-h1 font-bold tracking-tight', bhMarginBottom('md'))}>Finish setting up your account</h1>
+        <p className="bh-lead">
+          Add a few details to complete your {isPartner ? 'partner' : 'client'} registration.
+        </p>
+      </div>
+    </header>
+  );
 
-        <form className={bhSpaceY('4')} onSubmit={handleSubmit(onSubmit)}>
-          {error && (
-            <div className={cn('border border-red-200 bg-red-50', bhRounded('xl'), bhPadding('4'), 'py-3')}>
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
+  const formBody = (
+    <form className={cn('flex w-full flex-col', bhGap('6'), 'md:gap-8')} onSubmit={handleSubmit(onSubmit)} noValidate>
+      {emailParam ? (
+        <p
+          className={cn(
+            'text-center font-avenir-regular text-sm font-normal leading-5 text-[#535862]',
+            BH_AUTH_HUB_PRIMARY_STACK_WIDTH,
           )}
-          {success && (
-            <div className={cn('border border-green-200 bg-green-50', bhRounded('xl'), bhPadding('4'), 'py-3')}>
-              <p className="text-sm text-green-800">Account set up successfully! Redirecting you now…</p>
-            </div>
+        >
+          Signed in as <span className="font-semibold text-[#0b1d37]">{emailParam}</span>
+        </p>
+      ) : null}
+
+      {error && (
+        <div
+          className={cn(
+            'border border-red-200 bg-red-50',
+            bhRounded('xl'),
+            bhSpacing(bhPadding('3'), 'sm:p-4'),
           )}
+        >
+          <p className="bh-small text-center text-red-800 sm:text-sm">{error}</p>
+        </div>
+      )}
 
+      {success && (
+        <div
+          className={cn(
+            'border border-green-200 bg-green-50 text-center',
+            bhRounded('lg'),
+            bhPadding('4'),
+          )}
+        >
+          <p className="font-avenir-regular text-xs font-medium text-green-800 sm:text-base">
+            Account set up successfully. Redirecting you now…
+          </p>
+        </div>
+      )}
+
+      <div className={bhSpaceY('4')}>
+        <div className={BH_HUB_AUTH_FIELD_GRID_CLASSES}>
           <div>
-            <label className="bh-label block mb-1.5 text-booking-dark">Full Name</label>
-            <input {...register('fullName')} type="text" autoComplete="name"
-              className={`bh-input bg-white ${errors.fullName ? 'bh-input-error' : ''}`} />
-            {errors.fullName && <p className="bh-small mt-1 text-red-600">{errors.fullName.message}</p>}
+            <BookingHubInputField
+              id="bh-complete-profile-name"
+              type="text"
+              autoComplete="name"
+              label="Full name"
+              placeholder="Enter your name"
+              error={errors.fullName?.message}
+              size="md"
+              {...register('fullName')}
+            />
           </div>
-
           <div>
-            <label className="bh-label block mb-1.5 text-booking-dark">Company Name</label>
-            <input {...register('companyName')} type="text" autoComplete="organization"
-              className={`bh-input bg-white ${errors.companyName ? 'bh-input-error' : ''}`} />
-            {errors.companyName && <p className="bh-small mt-1 text-red-600">{errors.companyName.message}</p>}
+            <BookingHubInputField
+              id="bh-complete-profile-company"
+              type="text"
+              autoComplete="organization"
+              label="Company name"
+              placeholder="e.g. Acme Ltd"
+              error={errors.companyName?.message}
+              size="md"
+              {...register('companyName')}
+            />
           </div>
-
-          <div>
+        </div>
+        <div className={BH_HUB_AUTH_FIELD_GRID_CLASSES}>
+          <div className="sm:col-span-2">
             <BookingHubPhoneField
               id="bh-complete-profile-phone"
-              label="Phone Number"
               autoComplete="tel"
+              label="Phone number"
+              placeholder="e.g. 07700 900000"
               error={errors.phone?.message}
-              defaultCountryIso="GB"
               size="md"
+              defaultCountryIso="GB"
               {...register('phone')}
             />
           </div>
-
-          <div className={cn('flex items-start', bhGap('3'))}>
-            <input
-              {...register('termsAccepted')}
-              type="checkbox"
-              id="termsAccepted"
-              className={cn(
-                'mt-0.5 h-4 w-4 cursor-pointer border-2 focus:outline-none focus:ring-2 focus:ring-booking-teal focus:ring-offset-2 focus:ring-offset-white',
-                bhRounded('md'),
-                errors.termsAccepted ? 'border-red-500' : 'border-gray-300 text-booking-teal',
-              )}
-            />
-            <label htmlFor="termsAccepted" className={`bh-small leading-relaxed cursor-pointer select-none ${errors.termsAccepted ? 'text-red-700' : 'text-gray-700'}`}>
-              I agree to the{' '}
-              <Link href={termsHref} target="_blank" rel="noopener noreferrer" className="font-medium underline text-booking-teal hover:text-booking-dark" onClick={(e) => e.stopPropagation()}>
-                {termsLabel}
-              </Link>
-            </label>
-          </div>
-          {errors.termsAccepted && <p className="bh-small text-red-600">{errors.termsAccepted.message}</p>}
-
-          <BookingHubPrimaryButton
-            type="submit"
-            fullWidth
-            responsive
-            disabled={loading || success}
-            loading={loading}
-            loadingText="Setting up account…"
-          >
-            Complete Account Setup
-          </BookingHubPrimaryButton>
-        </form>
+        </div>
       </div>
-    </div>
+
+      <div className={cn('flex items-start', bhGap('3'))}>
+        <input
+          {...register('termsAccepted')}
+          type="checkbox"
+          id={termsId}
+          className={cn(
+            'mt-0.5 h-4 w-4 cursor-pointer border-2 focus:outline-none focus:ring-2 focus:ring-booking-teal focus:ring-offset-2 focus:ring-offset-white',
+            bhRounded('md'),
+            errors.termsAccepted ? 'border-red-500 text-red-600' : 'border-gray-300 text-booking-teal',
+          )}
+        />
+        <label
+          htmlFor={termsId}
+          className={cn(
+            'bh-small cursor-pointer select-none leading-relaxed',
+            errors.termsAccepted ? 'text-red-700' : 'text-gray-700',
+          )}
+        >
+          I agree to the{' '}
+          <Link
+            href={termsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-booking-teal underline hover:text-booking-dark"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {termsLinkText}
+          </Link>
+          .
+        </label>
+      </div>
+      {errors.termsAccepted ? (
+        <p className="bh-small -mt-2 text-red-600">{errors.termsAccepted.message}</p>
+      ) : null}
+
+      <div className={cn('flex w-full flex-col', bhGap('4'), 'md:gap-8', BH_AUTH_HUB_PRIMARY_STACK_WIDTH)}>
+        <BookingHubPrimaryButton
+          type="submit"
+          fullWidth
+          responsive
+          disabled={loading || success}
+          loading={loading}
+          loadingText="Saving…"
+        >
+          Continue
+        </BookingHubPrimaryButton>
+      </div>
+    </form>
+  );
+
+  const inner = (
+    <>
+      {header}
+      <div
+        className={cn(
+          BH_HUB_AUTH_CARD_WHITE,
+          'flex flex-col',
+          bhMarginTop('6'),
+          'md:mt-8',
+          bhGap('6'),
+          'md:gap-8',
+        )}
+      >
+        {formBody}
+      </div>
+    </>
+  );
+
+  return (
+    <main className="font-avenir-regular">
+      <BookingHubSignUpPageShell variant="hubCard">{inner}</BookingHubSignUpPageShell>
+    </main>
+  );
+}
+
+function CompleteProfileFallback() {
+  return (
+    <main className="font-avenir-regular">
+      <BookingHubSignUpPageShell variant="hubCard">
+        <div className="flex min-h-[40vh] items-center justify-center font-avenir-regular text-sm text-[#535862]">
+          Loading…
+        </div>
+      </BookingHubSignUpPageShell>
+    </main>
   );
 }
 
 export default function CompleteProfilePage() {
   return (
-    <Suspense>
+    <Suspense fallback={<CompleteProfileFallback />}>
       <CompleteProfileForm />
     </Suspense>
   );

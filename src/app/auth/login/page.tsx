@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { BookingHubInputField } from '@/components/BookingHubInputField';
 import { BH_INPUT_FIELD_ICON_COLOR } from '@/components/bookingHubInputFieldTypography';
-import { BookingHubPrimaryButton } from '@/components/booking-hub-button';
+import { BookingHubLinkColorButton, BookingHubPrimaryButton } from '@/components/booking-hub-button';
 import { BH_GRID_SHELL_CLASSES } from '@/components/booking-hub-grid';
 import { BookingHubSignUpPageShell } from '@/components/auth/BookingHubSignUpPageShell';
 import { AuthHubSegmentedTabs, BH_AUTH_HUB_PRIMARY_STACK_WIDTH } from '@/components/auth/AuthHubSegmentedTabs';
@@ -243,7 +243,7 @@ function LoginContent() {
   const logInHref = userType === 'landlord' ? '/auth/login?type=partner' : '/auth/login?type=client';
 
   return (
-    <main className={cn('font-avenir-regular text-[#0B1D37] antialiased')}>
+    <main className={cn('font-avenir-regular antialiased')}>
       <BookingHubSignUpPageShell variant="hubCard">
         <>
           <header className="flex w-full flex-col items-center">
@@ -413,37 +413,23 @@ function LoginContent() {
                 Sign in
               </BookingHubPrimaryButton>
 
-              <p
-                className={cn(
-                  'flex flex-wrap items-center justify-center text-center font-avenir-regular text-sm font-normal leading-5 text-[#535862]',
-                  bhGap('1'),
-                  BH_AUTH_HUB_PRIMARY_STACK_WIDTH,
-                )}
-              >
-                <span>Don&apos;t have an account?</span>
-                <Link
-                  href={signUpPath}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.location.href = signUpPath;
-                  }}
-                  className="font-semibold text-[#008884] hover:underline"
-                >
-                  Create one here
-                </Link>
-              </p>
-
               <p className={cn('text-center', BH_AUTH_HUB_PRIMARY_STACK_WIDTH)}>
-                <Link
-                  href="/"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.location.href = '/';
-                  }}
-                  className="bh-small font-semibold text-[#717680] hover:text-booking-dark hover:underline"
-                >
-                  ← Go back to home
-                </Link>
+                <span className="inline-flex flex-wrap items-baseline justify-center font-avenir-regular text-sm font-normal leading-5 lg:text-base lg:leading-6">
+                  <span className="text-[#535862]">
+                    Don&apos;t have an account?{' '}
+                  </span>
+                  <BookingHubLinkColorButton
+                    type="button"
+                    responsive
+                    contentSized
+                    className="!min-h-0 h-auto !py-0 !px-0 align-baseline shadow-none"
+                    onClick={() => {
+                      window.location.href = signUpPath;
+                    }}
+                  >
+                    Create one here
+                  </BookingHubLinkColorButton>
+                </span>
               </p>
             </form>
           </div>

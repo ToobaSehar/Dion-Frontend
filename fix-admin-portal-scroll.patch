@@ -1,0 +1,23 @@
+--- a/src/components/client-portal-figma/AdminPortalBookingDetailView.tsx
++++ b/src/components/client-portal-figma/AdminPortalBookingDetailView.tsx
+@@ -328,7 +328,7 @@ export type AdminPortalBookingDetailViewProps = {
+ 
+ export function AdminPortalBookingDetailView({ detail, onBack, className }: AdminPortalBookingDetailViewProps) {
+   return (
+-    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-0 sm:px-8 lg:px-10', className)}>
++    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-16 sm:pb-20 lg:pb-24 sm:px-8 lg:px-10', className)}>
+       <div className="mb-8 flex flex-col gap-6">
+         <button
+           type="button"
+
+--- a/src/components/client-portal-figma/AdminPortalPaymentDetailView.tsx
++++ b/src/components/client-portal-figma/AdminPortalPaymentDetailView.tsx
+@@ -277,7 +277,7 @@ export type AdminPortalPaymentDetailViewProps = {
+ 
+ export function AdminPortalPaymentDetailView({ detail, onBack, className }: AdminPortalPaymentDetailViewProps) {
+   return (
+-    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-0 sm:px-8 lg:px-10', className)}>
++    <div className={cn('flex w-full min-w-0 max-w-full flex-col px-6 pb-16 sm:pb-20 lg:pb-24 sm:px-8 lg:px-10', className)}>
+       <div className="mb-8 flex flex-col gap-6">
+         <button
+           type="button"

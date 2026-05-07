@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -190,7 +189,7 @@ export function ClientSignupScreen({ standalone = true, ssoReturnTo }: ClientSig
           bhGap('2'),
         )}
       >
-        <h1 className={cn('bh-h1 font-bold tracking-tight', bhMarginBottom('md'))}>Create an account</h1>
+        <h1 className={cn('bh-h1 font-bold tracking-tight', bhMarginBottom('md'))}>Sign up as a client</h1>
         <p className="bh-lead">Start your 30-day free trial.</p>
       </div>
     </header>
@@ -344,22 +343,26 @@ export function ClientSignupScreen({ standalone = true, ssoReturnTo }: ClientSig
 
       <p
         className={cn(
-          'flex flex-wrap items-center justify-center text-center font-avenir-regular text-sm font-normal leading-5 text-[#535862]',
-          bhGap('1'),
+          'text-center font-avenir-regular text-sm font-normal leading-5 text-[#535862] lg:text-base lg:leading-6',
           BH_AUTH_HUB_PRIMARY_STACK_WIDTH,
         )}
       >
-        <span>Already have an account?</span>
-        <Link
-          href="/auth/login?type=client"
-          onClick={(e) => {
-            e.preventDefault();
-            window.location.href = '/auth/login?type=client';
-          }}
-          className="font-semibold text-[#008884] hover:underline"
-        >
-          Log in
-        </Link>
+        <span className="inline-flex flex-wrap items-baseline justify-center">
+          <span>
+            Already have an account?{' '}
+          </span>
+          <BookingHubLinkColorButton
+            type="button"
+            responsive
+            contentSized
+            className="!min-h-0 h-auto !py-0 !px-0 align-baseline shadow-none"
+            onClick={() => {
+              window.location.href = '/auth/login?type=client';
+            }}
+          >
+            Log in
+          </BookingHubLinkColorButton>
+        </span>
       </p>
     </form>
   );

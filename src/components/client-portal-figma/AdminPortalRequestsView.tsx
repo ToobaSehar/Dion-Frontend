@@ -52,6 +52,20 @@ const MOCK_ROWS: AdminPortalRequestTableRow[] = [
     offers: '6',
   },
   {
+    id: '9',
+    reference: 'RQ-2024-0155',
+    client: 'James Davies',
+    company: 'Acme Council',
+    location: 'Manchester',
+    checkIn: '1 Apr 2024',
+    checkOut: '30 Jun 2024',
+    nights: 91,
+    guests: 1,
+    budgetExcVat: '£88',
+    status: 'in-progress',
+    offers: '2',
+  },
+  {
     id: '1',
     reference: 'BR-2024-0891',
     client: 'Sarah Mitchell',
@@ -201,6 +215,15 @@ function statusLabel(status: AdminPortalRequestRowStatus): string {
     case 'expired':
       return 'Expired';
   }
+}
+
+/** Shared pill styling for request row status (directory + client-detail Requests tab). */
+export function adminPortalRequestRowStatusBadgeClass(status: AdminPortalRequestRowStatus): string {
+  return statusBadgeClass(status);
+}
+
+export function adminPortalRequestRowStatusLabel(status: AdminPortalRequestRowStatus): string {
+  return statusLabel(status);
 }
 
 function rowMatchesFilter(row: AdminPortalRequestTableRow, tab: AdminPortalRequestsFilterTab): boolean {

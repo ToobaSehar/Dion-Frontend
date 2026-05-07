@@ -27,7 +27,7 @@ const shellBg = 'bg-[#F6F6F4]';
 
 /**
  * Standalone admin request detail under `/admin/portal-figma/requests/[id]` —
- * same shell as {@link AdminPortalFigmaScreen} (sidebar + top bar + scroll region).
+ * sidebar + top bar + inner scroll pane (same containment as {@link AdminPortalFigmaBookingDetailScreen}).
  */
 export function AdminPortalFigmaRequestDetailScreen({
   requestId,
@@ -43,13 +43,13 @@ export function AdminPortalFigmaRequestDetailScreen({
   const router = useRouter();
   const { signOut } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const mainRef = useRef<HTMLElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   const row = requestId ? getAdminPortalRequestMockRowById(requestId) : undefined;
 
   useEffect(() => {
-    const mainEl = mainRef.current;
-    if (mainEl) mainEl.scrollTop = 0;
+    const el = contentScrollRef.current;
+    if (el) el.scrollTop = 0;
   }, [requestId]);
 
   const handleMainViewChange = useCallback(
@@ -90,16 +90,21 @@ export function AdminPortalFigmaRequestDetailScreen({
         adminOnLogout={handleAdminLogout}
       />
       <main
-        ref={mainRef}
         className={cn(
-          'flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden',
+          'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
           shellBg,
         )}
       >
         <header className="sticky top-0 z-20 shrink-0 border-b border-[#e9eaeb] bg-white shadow-[0px_1px_0px_rgba(10,13,18,0.04)]">
           <ClientPortalMainTopBar userInitials={userInitials} onToggleSidebar={() => setSidebarCollapsed((c) => !c)} />
         </header>
-        <div className="flex w-full min-w-0 flex-col py-6">
+        <div
+          ref={contentScrollRef}
+          className={cn(
+            'flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden py-6',
+            'pb-16 sm:pb-20 lg:pb-24',
+          )}
+        >
           <AdminPortalRequestDetailView detail={detail} onBack={handleBackToRequests} />
         </div>
       </main>

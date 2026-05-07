@@ -207,6 +207,11 @@ const MOCK_ROWS: AdminPortalPropertyTableRow[] = [
   },
 ];
 
+/** Properties mock rows for a partner business name — used by partner detail → Properties (no change to directory filtering). */
+export function getAdminPortalPropertyMockRowsForPartnerName(partnerName: string): AdminPortalPropertyTableRow[] {
+  return MOCK_ROWS.filter((r) => r.partnerName === partnerName);
+}
+
 export type AdminPortalPropertiesViewMode = 'list' | 'cards' | 'map';
 
 function rowMatchesListing(row: AdminPortalPropertyTableRow, tab: AdminPortalPropertyListingTab): boolean {

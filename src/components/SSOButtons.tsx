@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { BookingHubSecondaryButton } from '@/components/booking-hub-button';
 
@@ -12,13 +13,27 @@ interface SSOButtonsProps {
 }
 
 export function SSOButtons({ role, returnTo, onBeforeRedirect, verb = 'sign-in' }: SSOButtonsProps) {
+  const router = useRouter();
+
   const buildRedirectTo = () => {
     const base = typeof window !== 'undefined' ? window.location.origin : '';
     const rt = returnTo ? `&return_to=${encodeURIComponent(returnTo)}` : '';
     return `${base}/auth/callback?role=${role}${rt}`;
   };
 
+  /** Email/password OAuth is deferred; take user to the same “finish setup” hub as post-SSO. */
+  const goToSignUpCompleteProfile = () => {
+    onBeforeRedirect?.();
+    const params = new URLSearchParams({ role, signup_sso: '1' });
+    if (returnTo) params.set('return_to', returnTo);
+    router.push(`/auth/complete-profile?${params.toString()}`);
+  };
+
   const handleGoogle = async () => {
+    if (verb === 'sign-up') {
+      goToSignUpCompleteProfile();
+      return;
+    }
     onBeforeRedirect?.();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -27,6 +42,10 @@ export function SSOButtons({ role, returnTo, onBeforeRedirect, verb = 'sign-in' 
   };
 
   const handleMicrosoft = async () => {
+    if (verb === 'sign-up') {
+      goToSignUpCompleteProfile();
+      return;
+    }
     onBeforeRedirect?.();
     await supabase.auth.signInWithOAuth({
       provider: 'azure',

@@ -20,6 +20,7 @@ import { AdminPortalPartnersView } from '@/components/client-portal-figma/AdminP
 import { AdminPortalPropertiesView } from '@/components/client-portal-figma/AdminPortalPropertiesView';
 import { AdminPortalPaymentsView } from '@/components/client-portal-figma/AdminPortalPaymentsView';
 import { AdminPortalPayoutsView } from '@/components/client-portal-figma/AdminPortalPayoutsView';
+import { AdminPortalInvoicesView } from '@/components/client-portal-figma/AdminPortalInvoicesView';
 import type { AdminPortalBookingsFilterTab } from '@/components/client-portal-figma/AdminPortalBookingsStatusPills';
 import type { AdminPortalPaymentsFilterTab } from '@/components/client-portal-figma/AdminPortalPaymentsStatusPills';
 import type { AdminPortalRequestsFilterTab } from '@/components/client-portal-figma/AdminPortalRequestsStatusPills';
@@ -46,9 +47,6 @@ export type AdminPortalFigmaDashboardProps = {
   onBankTransfersUnconfirmedConfirm?: () => void;
   paymentsStatusFilter?: AdminPortalPaymentsFilterTab;
   onPaymentsStatusFilterChange?: (tab: AdminPortalPaymentsFilterTab) => void;
-  /** When set, shows booking detail instead of the bookings table (portal-figma). */
-  adminBookingDetailRow?: AdminPortalBookingTableRow | null;
-  onAdminBookingDetailClose?: () => void;
   onBookingRowView?: (row: AdminPortalBookingTableRow) => void;
   /** When set, shows payment detail instead of the payments table (portal-figma). */
   adminPaymentDetailRow?: AdminPortalPaymentTableRow | null;
@@ -72,8 +70,6 @@ export function AdminPortalFigmaDashboard({
   onBankTransfersUnconfirmedConfirm,
   paymentsStatusFilter,
   onPaymentsStatusFilterChange,
-  adminBookingDetailRow,
-  onAdminBookingDetailClose,
   onBookingRowView,
   adminPaymentDetailRow,
   onAdminPaymentDetailClose,
@@ -93,7 +89,7 @@ export function AdminPortalFigmaDashboard({
     if (mainEl) mainEl.scrollTop = 0;
     const contentEl = contentScrollRef.current;
     if (contentEl) contentEl.scrollTop = 0;
-  }, [activeMainView, adminBookingDetailRow, adminPaymentDetailRow]);
+  }, [activeMainView, adminPaymentDetailRow]);
 
   const shellBg = 'bg-[#F6F6F4]';
 
@@ -145,10 +141,6 @@ export function AdminPortalFigmaDashboard({
               const detail = resolveAdminBookingDetailFromPayment(adminPaymentDetailRow);
               return <AdminPortalBookingDetailView detail={detail} onBack={onAdminPaymentDetailClose} />;
             }
-            const detail = adminBookingDetailRow != null ? resolveAdminBookingDetail(adminBookingDetailRow) : null;
-            if (detail && onAdminBookingDetailClose) {
-              return <AdminPortalBookingDetailView detail={detail} onBack={onAdminBookingDetailClose} />;
-            }
             return (
               <AdminPortalBookingsView
                 statusFilter={bookingsStatusFilter}
@@ -166,6 +158,7 @@ export function AdminPortalFigmaDashboard({
           />
         ) : null}
         {activeMainView === 'payouts' ? <AdminPortalPayoutsView /> : null}
+        {activeMainView === 'invoices' ? <AdminPortalInvoicesView /> : null}
         {activeMainView === 'clients' ? <AdminPortalClientsView /> : null}
         {activeMainView === 'partners' ? <AdminPortalPartnersView /> : null}
         {activeMainView === 'properties' ? <AdminPortalPropertiesView /> : null}

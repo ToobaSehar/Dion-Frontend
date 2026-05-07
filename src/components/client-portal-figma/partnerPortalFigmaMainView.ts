@@ -21,6 +21,9 @@ export const PARTNER_PORTAL_HUB_REQUESTS_IN_MY_AREA_HREF =
 export const PARTNER_PORTAL_HUB_MY_BOOKINGS_HREF =
   `/partner/dashboard?${PARTNER_PORTAL_HUB_VIEW_QUERY_KEY}=my-bookings` as const;
 
+export const PARTNER_PORTAL_HUB_MY_OFFERS_HREF =
+  `/partner/dashboard?${PARTNER_PORTAL_HUB_VIEW_QUERY_KEY}=my-offers` as const;
+
 /** Dedicated payouts hub (partner shell + payouts table). */
 export const PARTNER_PORTAL_PAYOUTS_HREF = '/payouts' as const;
 
@@ -38,4 +41,14 @@ export function partnerHubMainViewFromSearchParam(raw: string | null): PartnerPo
     default:
       return 'dashboard';
   }
+}
+
+/** Offer detail at `/partner/dashboard/offers/[offerId]`. */
+export function partnerOfferDetailHref(offerId: string): string {
+  return `/partner/dashboard/offers/${encodeURIComponent(offerId)}`;
+}
+
+/** Partner booking detail at `/partner/dashboard/bookings/[bookingRowId]`. */
+export function partnerBookingDetailHref(bookingRowId: string): string {
+  return `/partner/dashboard/bookings/${encodeURIComponent(bookingRowId)}`;
 }

@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { ChevronRight, Search } from 'lucide-react';
 
+import { adminPortalPartnerDetailHref } from '@/components/client-portal-figma/adminPortalFigmaMainView';
 import {
   AdminPortalPartnerTypePills,
   type AdminPortalPartnerTypeTab,
@@ -96,6 +98,11 @@ const MOCK_ROWS: AdminPortalPartnerTableRow[] = [
   },
 ];
 
+/** Resolve a mock partner row by `id` for `/admin/portal-figma/partners/[partnerId]` (static export–friendly). */
+export function getAdminPortalPartnerMockRowById(id: string): AdminPortalPartnerTableRow | undefined {
+  return MOCK_ROWS.find((row) => row.id === id);
+}
+
 function rowMatchesType(row: AdminPortalPartnerTableRow, tab: AdminPortalPartnerTypeTab): boolean {
   if (tab === 'all') return true;
   return row.typeKind === tab;
@@ -122,7 +129,7 @@ const thClass =
 const tdClass = 'font-avenir-regular px-4 py-3.5 text-sm leading-5 text-[#0B1D37] sm:px-5';
 
 /**
- * Admin **Partners** — search + type pills + directory table (static data), aligned with `AdminPortalClientsView` chrome and teal accents.
+ * Admin **Partners** — search + type pills in one horizontal row + directory table (static data), aligned with `AdminPortalClientsView` chrome and teal accents.
  */
 export function AdminPortalPartnersView({ className, rows = MOCK_ROWS }: AdminPortalPartnersViewProps) {
   const [partnerType, setPartnerType] = useState<AdminPortalPartnerTypeTab>('all');
@@ -138,7 +145,7 @@ export function AdminPortalPartnersView({ className, rows = MOCK_ROWS }: AdminPo
         Partners
       </h1>
 
-      <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+      <div className="mt-6 flex min-w-0 flex-row flex-nowrap items-center gap-4 sm:gap-6">
         <div className="relative min-w-0 flex-1">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-[#717680]"
@@ -154,7 +161,12 @@ export function AdminPortalPartnersView({ className, rows = MOCK_ROWS }: AdminPo
             aria-label="Search partners"
           />
         </div>
-        <AdminPortalPartnerTypePills value={partnerType} onChange={setPartnerType} className="min-w-0 shrink-0 lg:max-w-[52%]" />
+        <AdminPortalPartnerTypePills
+          value={partnerType}
+          onChange={setPartnerType}
+          justify="start"
+          className="shrink-0 flex-nowrap"
+        />
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-solid border-[#e9eaeb] bg-white shadow-[0_1px_2px_rgba(11,29,55,0.06)]">
@@ -194,13 +206,13 @@ export function AdminPortalPartnersView({ className, rows = MOCK_ROWS }: AdminPo
                       </span>
                     </td>
                     <td className={cn(tdClass, 'pr-6 text-right')}>
-                      <button
-                        type="button"
+                      <Link
+                        href={adminPortalPartnerDetailHref(row.id)}
                         className="font-avenir-regular inline-flex items-center justify-end gap-0.5 text-sm font-semibold text-[#00BAB5] transition-colors hover:text-[#008884]"
                       >
                         View
                         <ChevronRight className="size-4 shrink-0" strokeWidth={2} aria-hidden />
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

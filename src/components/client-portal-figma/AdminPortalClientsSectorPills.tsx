@@ -25,7 +25,7 @@ export type AdminPortalClientsSectorPillsProps = {
 
 export function AdminPortalClientsSectorPills({ value, onChange, className }: AdminPortalClientsSectorPillsProps) {
   return (
-    <div className={cn('flex flex-wrap items-center justify-end gap-2', className)} role="tablist" aria-label="Filter clients by sector">
+    <div className={cn('flex flex-nowrap items-center justify-start gap-2', className)} role="tablist" aria-label="Filter clients by sector">
       {ADMIN_PORTAL_CLIENTS_SECTOR_TAB_ITEMS.map((tab) => {
         const selected = value === tab.id;
         return (

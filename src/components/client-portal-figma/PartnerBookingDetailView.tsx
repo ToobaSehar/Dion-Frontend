@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useId, useState, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -12,7 +13,9 @@ import {
   Moon,
   Plus,
   PoundSterling,
+  Save,
   Users,
+  X,
   XCircle,
 } from 'lucide-react';
 
@@ -21,6 +24,9 @@ import {
   BookingHubSecondaryButton,
   BookingHubSecondaryDeleteButton,
 } from '@/components/booking-hub-button';
+import { BookingHubInputField } from '@/components/BookingHubInputField';
+import { bhRounded } from '@/components/booking-hub-radius/bookingHubRadius';
+import { BH_STACKED_MODAL_PANEL_SHADOW } from '@/components/booking-hub-stacked-modal/bookingHubStackedModalTokens';
 import {
   bookingStatusLabel,
   bookingStatusPillClass,
@@ -40,6 +46,20 @@ const SUMMARY_ICON_WRAP =
 const VAT_INVOICE_BODY =
   'Generate a VAT invoice for this booking covering the client, property, dates and VAT breakdown.';
 
+type CheckInInstructionsDraft = {
+  accessMethod: string;
+  keyLockboxCode: string;
+  parkingInstructions: string;
+  arrivalNotes: string;
+};
+
+const DEFAULT_CHECK_IN_INSTRUCTIONS_DRAFT: CheckInInstructionsDraft = {
+  accessMethod: '',
+  keyLockboxCode: '',
+  parkingInstructions: '',
+  arrivalNotes: '',
+};
+
 function completedCheckInField(value: string | undefined): string {
   return value != null && value.trim() !== '' ? value : '—';
 }
@@ -49,6 +69,145 @@ export type PartnerBookingDetailViewProps = {
   detail: PartnerBookingDetail;
   onBack: () => void;
 };
+
+type PartnerCheckInInstructionsModalProps = {
+  open: boolean;
+  draft: CheckInInstructionsDraft;
+  onClose: () => void;
+  onSave: () => void;
+  onDraftChange: (field: keyof CheckInInstructionsDraft, value: string) => void;
+};
+
+function PartnerCheckInInstructionsModal({
+  open,
+  draft,
+  onClose,
+  onSave,
+  onDraftChange,
+}: PartnerCheckInInstructionsModalProps) {
+  const titleId = useId();
+  const descriptionId = useId();
+
+  const handleBackdropMouseDown = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="presentation"
+      onMouseDown={handleBackdropMouseDown}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className={cn(
+          'relative w-full max-w-[640px] bg-white px-6 pb-7 pt-6 sm:px-8 sm:pb-8 sm:pt-7',
+          bhRounded('2xl'),
+          BH_STACKED_MODAL_PANEL_SHADOW,
+        )}
+      >
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className={cn(
+            'absolute right-4 top-4 inline-flex size-10 items-center justify-center text-[#A4A7AE] transition-colors hover:bg-[#F6F6F4] hover:text-[#4B4E53]',
+            bhRounded('md'),
+          )}
+        >
+          <X className="size-5" strokeWidth={2} aria-hidden />
+        </button>
+
+        <header className="pr-10">
+          <h2 id={titleId} className="font-avenir-regular text-3xl font-semibold leading-10 tracking-tight text-[#0B1D37]">
+            Check-in Instructions
+          </h2>
+          <p id={descriptionId} className="font-avenir-regular mt-1 text-base font-normal leading-6 text-[#535862]">
+            These will be sent to the guest 24 hours before check-in.
+          </p>
+        </header>
+
+        <form
+          className="mt-6 space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSave();
+          }}
+        >
+          <BookingHubInputField
+            label="Property Access Method"
+            placeholder="e.g. Lockbox, key safe, meet at property"
+            value={draft.accessMethod}
+            onChange={(event) => onDraftChange('accessMethod', event.target.value)}
+          />
+          <BookingHubInputField
+            label="Key / Lockbox Code"
+            placeholder="e.g. 1234#"
+            value={draft.keyLockboxCode}
+            onChange={(event) => onDraftChange('keyLockboxCode', event.target.value)}
+          />
+          <BookingHubInputField
+            label="Parking Instructions"
+            multiline
+            rows={4}
+            placeholder="Parking details..."
+            value={draft.parkingInstructions}
+            onChange={(event) => onDraftChange('parkingInstructions', event.target.value)}
+          />
+          <BookingHubInputField
+            label="Arrival Notes"
+            multiline
+            rows={4}
+            placeholder="Any other arrival info..."
+            value={draft.arrivalNotes}
+            onChange={(event) => onDraftChange('arrivalNotes', event.target.value)}
+          />
+
+          <div className="flex justify-end pt-1">
+            <BookingHubPrimaryButton
+              type="submit"
+              responsive
+              responsiveCompact
+              iconLeading={<Save className="size-5 shrink-0" strokeWidth={2} aria-hidden />}
+            >
+              Save Instructions
+            </BookingHubPrimaryButton>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 function SummaryTile({
   icon: Icon,
@@ -75,16 +234,37 @@ function SummaryTile({
  */
 export function PartnerBookingDetailView({ className, detail, onBack }: PartnerBookingDetailViewProps) {
   const router = useRouter();
+  const [isCheckInInstructionsModalOpen, setIsCheckInInstructionsModalOpen] = useState(false);
+  const [checkInInstructionsDraft, setCheckInInstructionsDraft] = useState<CheckInInstructionsDraft>(
+    DEFAULT_CHECK_IN_INSTRUCTIONS_DRAFT,
+  );
+
+  const handleOpenCheckInInstructionsModal = useCallback(() => {
+    setIsCheckInInstructionsModalOpen(true);
+  }, []);
+
+  const handleCloseCheckInInstructionsModal = useCallback(() => {
+    setIsCheckInInstructionsModalOpen(false);
+  }, []);
+
+  const handleSaveCheckInInstructions = useCallback(() => {
+    setIsCheckInInstructionsModalOpen(false);
+  }, []);
+
+  const handleCheckInDraftFieldChange = useCallback((field: keyof CheckInInstructionsDraft, value: string) => {
+    setCheckInInstructionsDraft((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   return (
-    <div className={cn('flex w-full flex-col gap-6 px-6 pb-16 sm:px-8 lg:px-10', className)}>
-      <button
-        type="button"
-        onClick={onBack}
-        className="font-avenir-regular inline-flex w-fit items-center gap-1 text-sm font-medium text-[#717680] transition-colors hover:text-[#0B1D37]"
-      >
-        <span aria-hidden>←</span> Back to Bookings
-      </button>
+    <>
+      <div className={cn('flex w-full flex-col gap-6 px-6 pb-16 sm:px-8 lg:px-10', className)}>
+        <button
+          type="button"
+          onClick={onBack}
+          className="font-avenir-regular inline-flex w-fit items-center gap-1 text-sm font-medium text-[#717680] transition-colors hover:text-[#0B1D37]"
+        >
+          <span aria-hidden>←</span> Back to Bookings
+        </button>
 
       <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1">
@@ -271,6 +451,7 @@ export function PartnerBookingDetailView({ className, detail, onBack }: PartnerB
               responsiveCompact
               className="shrink-0 sm:self-center"
               iconLeading={<Plus className="size-5 shrink-0" strokeWidth={2} aria-hidden />}
+              onClick={handleOpenCheckInInstructionsModal}
             >
               Add Instructions
             </BookingHubPrimaryButton>
@@ -313,6 +494,15 @@ export function PartnerBookingDetailView({ className, detail, onBack }: PartnerB
           Cancel Booking
         </BookingHubSecondaryDeleteButton>
       </section>
-    </div>
+      </div>
+
+      <PartnerCheckInInstructionsModal
+        open={isCheckInInstructionsModalOpen}
+        draft={checkInInstructionsDraft}
+        onClose={handleCloseCheckInInstructionsModal}
+        onSave={handleSaveCheckInInstructions}
+        onDraftChange={handleCheckInDraftFieldChange}
+      />
+    </>
   );
 }

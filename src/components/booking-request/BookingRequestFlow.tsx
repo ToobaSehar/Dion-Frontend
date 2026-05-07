@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SingleDatePicker from '@/components/SingleDatePicker';
 import {
+  BookingHubLinkColorButton,
   BookingHubLinkGrayButton,
   BookingHubPrimaryButton,
   BookingHubSecondaryButton,
@@ -974,21 +975,23 @@ export default function BookingRequestFlow(props: BookingRequestFlowProps = {}) 
                   </BookingHubLinkGrayButton>
                 </div>
 
-                <p
-                  className="bh-body bh-muted text-center"
-                  style={{ fontFamily: 'var(--font-avenir)', fontWeight: 500, letterSpacing: '0.02em' }}
-                >
-                  Already have an account?{' '}
-                  <a
-                    href="/auth/login?type=client"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.location.href = '/auth/login?type=client';
-                    }}
-                    className="font-medium text-[#00BAB5] underline hover:text-[#0B1D37]"
-                  >
-                    Sign in
-                  </a>
+                <p className="text-center">
+                  <span className="inline-flex flex-wrap items-baseline justify-center font-avenir-regular text-sm font-normal leading-5 lg:text-base lg:leading-6">
+                    <span className="text-[#535862]">
+                      Already have an account?{' '}
+                    </span>
+                    <BookingHubLinkColorButton
+                      type="button"
+                      responsive
+                      contentSized
+                      className="!min-h-0 h-auto !py-0 !px-0 align-baseline shadow-none"
+                      onClick={() => {
+                        window.location.href = '/auth/login?type=client';
+                      }}
+                    >
+                      Sign in
+                    </BookingHubLinkColorButton>
+                  </span>
                 </p>
               </div>
             )}

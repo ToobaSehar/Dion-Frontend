@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { FileText } from 'lucide-react';
 
@@ -7,6 +8,7 @@ import {
   PartnerOfferStatusBar,
   type PartnerOfferStatusFilter,
 } from '@/components/client-portal-figma/PartnerOfferStatusBar';
+import { partnerOfferDetailHref } from '@/components/client-portal-figma/partnerPortalFigmaMainView';
 import { cn } from '@/lib/utils';
 
 /** Align with `ClientPortalMyRequestsView` pills (submitted / confirmed / cancelled). */
@@ -39,25 +41,33 @@ const DEFAULT_OFFERS: PartnerOfferRow[] = [
   },
   {
     id: '2',
-    propertyName: 'Riverside Studios',
-    metaLine: 'Leeds · 1 Apr - 30 Jun 2024 · £95/night',
-    submittedLabel: 'Submitted 12 Mar',
+    propertyName: 'City Centre Apartment',
+    referenceId: 'BH-2024-0834',
+    metaLine: 'Birmingham · 1 May - 1 Aug 2024 · £130/night',
+    submittedLabel: 'Submitted 15 Feb',
     status: 'accepted',
   },
   {
     id: '3',
     propertyName: 'Victoria House',
-    referenceId: 'BH-2024-0834',
+    referenceId: 'BH-2024-0601',
     metaLine: 'Birmingham · 10 Apr - 10 Jul 2024 · £72/night',
     submittedLabel: 'Submitted 5 Mar',
     status: 'submitted',
   },
   {
     id: '4',
-    propertyName: 'Canal View Suites',
-    metaLine: 'Bristol · 20 May - 20 Aug 2024 · £88/night',
-    submittedLabel: 'Submitted 1 Feb',
+    propertyName: 'Northern Quarter Studio',
+    metaLine: 'Manchester · 20 Mar - 17 Apr 2024 · £70/night',
+    submittedLabel: 'Submitted 10 Feb',
     status: 'unsuccessful',
+  },
+  {
+    id: '5',
+    propertyName: 'Northern Quarter Studio',
+    metaLine: 'Leeds · 1 Apr - 24 Jun 2024 · £120/night',
+    submittedLabel: 'Submitted 18 Feb',
+    status: 'submitted',
   },
 ];
 
@@ -114,14 +124,16 @@ export function PartnerMyOffersView({ className, items = DEFAULT_OFFERS }: Partn
       <PartnerOfferStatusBar value={filter} onChange={setFilter} />
 
       <ul className="flex flex-col gap-3" role="list" aria-label="Your offers">
-        {visibleRows.map((row) => (
-          <li key={row.id}>
-            <article
-              className={cn(
-                'flex flex-col gap-4 rounded-[12px] border border-[#e9eaeb] bg-white p-4 shadow-[0px_1px_1px_rgba(10,13,18,0.05)] transition-shadow sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5',
-                'hover:shadow-[0px_4px_12px_rgba(10,13,18,0.06)]',
-              )}
-            >
+        {visibleRows.map((row) => {
+          const cardClass = cn(
+            'flex flex-col gap-4 rounded-[12px] border border-[#e9eaeb] bg-white p-4 shadow-[0px_1px_1px_rgba(10,13,18,0.05)] transition-shadow sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5',
+            'hover:shadow-[0px_4px_12px_rgba(10,13,18,0.06)]',
+            (row.status === 'submitted' || row.status === 'accepted' || row.status === 'unsuccessful') &&
+              'cursor-pointer',
+          );
+
+          const inner = (
+            <article className={cardClass}>
               <div className="flex min-w-0 flex-1 items-start gap-4">
                 <div
                   className="flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#F6F6F4] text-[#535862]"
@@ -152,8 +164,23 @@ export function PartnerMyOffersView({ className, items = DEFAULT_OFFERS }: Partn
                 </span>
               </div>
             </article>
-          </li>
-        ))}
+          );
+
+          return (
+            <li key={row.id}>
+              {row.status === 'submitted' || row.status === 'accepted' || row.status === 'unsuccessful' ? (
+                <Link
+                  href={partnerOfferDetailHref(row.id)}
+                  className="block rounded-[12px] outline-none ring-[#00BAB5] focus-visible:ring-2 focus-visible:ring-offset-2"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                inner
+              )}
+            </li>
+          );
+        })}
       </ul>
 
       {visibleRows.length === 0 ? (

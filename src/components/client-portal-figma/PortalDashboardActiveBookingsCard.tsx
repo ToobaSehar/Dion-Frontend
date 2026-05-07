@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { PoundSterling } from 'lucide-react';
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
 
@@ -46,6 +47,8 @@ export type PortalDashboardActiveBookingsCardProps = {
   headerIcon: LucideIcon;
   items: PortalDashboardActiveBookingsCardItem[];
   footerLabel?: string;
+  /** When set, footer is a Next.js link (e.g. client hub `?view=my-bookings`). */
+  footerHref?: string;
   emptyContent?: ReactNode;
   loading?: boolean;
   loadingContent?: ReactNode;
@@ -58,6 +61,9 @@ function statusPillClass(variant: PortalDashboardActiveBookingsCardItem['statusV
   return 'bg-[#4B4E53]';
 }
 
+const portalDashboardCardFooterLinkClass =
+  'font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00BAB5] focus-visible:ring-offset-2';
+
 /**
  * Active Bookings column — extracted from `ClientPortalDashboardHomeView` for reuse on client + partner dashboards.
  */
@@ -67,6 +73,7 @@ export function PortalDashboardActiveBookingsCard({
   headerIcon: HeaderIcon,
   items,
   footerLabel = 'View all bookings',
+  footerHref,
   emptyContent,
   loading,
   loadingContent,
@@ -119,9 +126,15 @@ export function PortalDashboardActiveBookingsCard({
 
       {footerLabel ? (
         <div className="flex justify-center border-t border-[#e9eaeb] py-5">
-          <button type="button" className="font-avenir-regular text-sm font-semibold text-[#00BAB5] hover:underline">
-            {footerLabel}
-          </button>
+          {footerHref ? (
+            <Link href={footerHref} className={portalDashboardCardFooterLinkClass}>
+              {footerLabel}
+            </Link>
+          ) : (
+            <button type="button" className={portalDashboardCardFooterLinkClass}>
+              {footerLabel}
+            </button>
+          )}
         </div>
       ) : null}
     </section>
